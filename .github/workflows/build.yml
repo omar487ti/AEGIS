@@ -24,21 +24,31 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets@3
           cat > capacitor.config.json <<'EOF'
           {"appId":"com.aegis.app","appName":"AEGIS","webDir":"www"}
           EOF
           npx cap add android
-          npx cap sync android
+
+      - name: App icon
+        run: |
+          if [ -f icon.png ]; then
+            mkdir -p assets
+            cp icon.png assets/icon.png
+            npx capacitor-assets generate --android --iconBackgroundColor '#2a4bd7' --iconBackgroundColorDark '#2a4bd7' || echo "Icon generation failed, using default icon"
+          else
+            echo "No icon.png found, using default icon"
+          fi
 
       - name: Build debug APK
         run: |
+          npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
       - uses: actions/upload-artifact@v4
         with:
-          name: darae-apk
+          name: aegis-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
