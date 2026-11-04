@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>AEGIS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: right-hand rail on desktop, bottom tab bar on phones; each tool is an open working surface (input, gauge, findings), not a stack of cards. */
+:root{
+  --bg:#edf0f5; --surface:#f8f9fc; --ink:#111a2e; --ink-2:#4b566b; --line:#d2d9e5;
+  --accent:#2a4bd7; --accent-ink:#ffffff; --accent-soft:#e0e6fb;
+  --good:#11765a; --good-soft:#d9f1e8; --warn:#955000; --warn-soft:#fbead0;
+  --bad:#c22b38; --bad-soft:#fce1e4; --crit:#8c1138; --crit-soft:#f8dae5;
+  --grid:rgba(42,75,215,.07);
+  --font-display:'Reem Kufi','IBM Plex Sans Arabic',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1019; --surface:#131a27; --ink:#e8ecf5; --ink-2:#9ba6bd; --line:#26314a;
+    --accent:#8aa0ff; --accent-ink:#0c1019; --accent-soft:#1c2650;
+    --good:#45d1a0; --good-soft:#123a2f; --warn:#f2a850; --warn-soft:#3b2a10;
+    --bad:#ff7b86; --bad-soft:#43181e; --crit:#ff80a6; --crit-soft:#44152a;
+    --grid:rgba(138,160,255,.08); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1019; --surface:#131a27; --ink:#e8ecf5; --ink-2:#9ba6bd; --line:#26314a;
+  --accent:#8aa0ff; --accent-ink:#0c1019; --accent-soft:#1c2650;
+  --good:#45d1a0; --good-soft:#123a2f; --warn:#f2a850; --warn-soft:#3b2a10;
+  --bad:#ff7b86; --bad-soft:#43181e; --crit:#ff80a6; --crit-soft:#44152a;
+  --grid:rgba(138,160,255,.08); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); direction:rtl;
+  font:15px/1.75 var(--font-body);
+  padding-block:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.35;margin:0;text-wrap:balance}
+h1{font-size:26px} h2{font-size:20px} h3{font-size:16px}
+p{margin:0}
+a{color:var(--accent)}
+.mono{font-family:var(--font-mono);direction:ltr;unicode-bidi:isolate}
+.shell{max-width:1080px;margin:0 auto;display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+.top{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px;
+  border:1px solid var(--line);border-radius:10px;background-color:var(--surface);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{flex:none}
+.brand-name{font-family:var(--font-display);font-size:24px;font-weight:700;line-height:1.2;letter-spacing:.12em;direction:ltr;text-align:start}
+.brand-sub{color:var(--ink-2);font-size:13px}
+.local{margin-inline-start:auto;font-size:12.5px;color:var(--good);background:var(--good-soft);padding:4px 10px;border-radius:4px;font-weight:500}
+.nav{
+  position:fixed;inset-inline:0;bottom:0;z-index:20;display:flex;gap:2px;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
+}
+.nav a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;font-size:11.5px;line-height:1.3;color:var(--ink-2);text-decoration:none;border-radius:8px}
+.nav .ic{width:40px;height:26px;border-radius:13px;display:grid;place-items:center}
+.nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav a[aria-current="page"]{color:var(--accent);font-weight:600}
+.nav a[aria-current="page"] .ic{background:var(--accent-soft)}
+main{min-width:0;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+[data-view]{display:grid;gap:18px;align-content:start}
+.lede{color:var(--ink-2);max-width:62ch}
+.head{display:grid;gap:6px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+label.lbl{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>input{flex:1 1 220px;min-width:0}
+input[type=text],input[type=password]{
+  font:14.5px/1.4 var(--font-mono);direction:ltr;text-align:left;min-height:46px;padding:0 12px;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);
+}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.btn{
+  font:500 14.5px var(--font-body);min-height:46px;padding:0 18px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.small{min-height:34px;padding:0 12px;font-size:13px}
+.note{font-size:13px;color:var(--ink-2);margin-top:6px}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.result{display:grid;gap:22px;padding-top:18px;border-top:1px solid var(--line)}
+.verdict{display:grid;gap:12px;justify-items:start;align-content:start;min-width:0}
+.gauge{width:100%;max-width:260px}
+.gauge svg{display:block;width:100%;height:auto;overflow:visible}
+.g-track{fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round}
+.g-fill{fill:none;stroke:var(--lv,var(--accent));stroke-width:14;stroke-linecap:round}
+.g-num{font:500 40px var(--font-mono);fill:var(--ink)}
+.g-cap{font:500 12.5px var(--font-body);fill:var(--ink-2)}
+@keyframes gfill{from{stroke-dashoffset:251.33}}
+@media (prefers-reduced-motion:no-preference){.g-fill{animation:gfill .9s ease-out}}
+.lv-low{--lv:var(--good);--lv-soft:var(--good-soft)}
+.lv-mid{--lv:var(--warn);--lv-soft:var(--warn-soft)}
+.lv-high{--lv:var(--bad);--lv-soft:var(--bad-soft)}
+.lv-crit{--lv:var(--crit);--lv-soft:var(--crit-soft)}
+.pill{display:inline-block;font-weight:600;font-size:13.5px;padding:2px 12px;border-radius:4px;background:var(--lv-soft);color:var(--lv)}
+.verdict p{max-width:46ch}
+.defang{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%}
+.defang code{flex:1 1 180px;min-width:0;font:13px/1.5 var(--font-mono);direction:ltr;text-align:left;overflow-wrap:anywhere;padding:6px 8px;background:var(--bg);border:1px dashed var(--line);border-radius:4px}
+.detail{display:grid;gap:18px;min-width:0;align-content:start}
+.anatomy{font:15px/1.9 var(--font-mono);direction:ltr;text-align:left;overflow-wrap:anywhere;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.anatomy .dim{color:var(--ink-2)}
+.anatomy .core{font-weight:500;color:var(--ink);border-bottom:2px solid var(--accent)}
+.anatomy-cap{font-size:13px;color:var(--ink-2);margin-top:6px}
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.sec-title span{font-size:13px;color:var(--ink-2)}
+.findings{list-style:none;margin:0;padding:0}
+.findings li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;padding:11px 0;border-top:1px solid var(--line);align-items:start}
+.findings li:first-child{border-top:0}
+.findings svg{width:20px;height:20px;margin-top:3px}
+.findings .t{font-weight:600}
+.findings .d{font-size:13.5px;color:var(--ink-2)}
+.pts{font:500 12.5px var(--font-mono);color:var(--ink-2);padding-top:4px}
+.sev-bad svg{color:var(--bad)} .sev-warn svg{color:var(--warn)} .sev-ok svg{color:var(--good)} .sev-info svg{color:var(--ink-2)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:0;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.facts div{padding:10px 14px;border-bottom:1px solid var(--line);min-width:0}
+.facts dt{font-size:12.5px;color:var(--ink-2)}
+.facts dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.facts dd.mono{font-size:14px;text-align:left}
+.ext{list-style:none;margin:0;padding:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.ext a{display:block;padding:10px 14px;border:1px solid var(--line);border-radius:6px;background:var(--surface);text-decoration:none;color:var(--ink)}
+.ext a b{display:block;color:var(--accent)}
+.ext a span{font-size:13px;color:var(--ink-2)}
+.keys{display:flex;flex-wrap:wrap;gap:6px}
+.keys code{font:12.5px var(--font-mono);padding:2px 8px;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.metrics div{padding:10px 14px;border-bottom:1px solid var(--line)}
+.metrics b{display:block;font-weight:500;font-size:12.5px;color:var(--ink-2)}
+.metrics span{font-weight:600}
+.checks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 16px}
+.checks li{display:flex;gap:8px;align-items:center;font-size:14px}
+.checks svg{width:18px;height:18px;flex:none}
+.checks .y svg{color:var(--good)} .checks .n{color:var(--ink-2)} .checks .n svg{color:var(--bad)}
+.tips-list{margin:0;padding-inline-start:20px;display:grid;gap:4px}
+.gen{display:grid;gap:14px;padding-top:18px;border-top:1px solid var(--line)}
+.opts{display:flex;flex-wrap:wrap;gap:8px 20px}
+.opts label{display:flex;align-items:center;gap:8px;font-size:14px;min-height:32px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tile b{display:block;font:500 30px/1.2 var(--font-mono)}
+.tile span{font-size:13px;color:var(--ink-2)}
+.dist{display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--line)}
+.dist i{display:block;background:var(--lv)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;margin-top:8px}
+.legend span{display:flex;gap:6px;align-items:center}
+.legend em{width:10px;height:10px;border-radius:2px;background:var(--lv);display:inline-block}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
+.hist .tg{font:14px var(--font-mono);direction:ltr;text-align:left;overflow-wrap:anywhere}
+.hist .mt{font-size:12.5px;color:var(--ink-2)}
+.hist .act{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+.empty{padding:18px;border:1px dashed var(--line);border-radius:6px;color:var(--ink-2)}
+.empty .row{margin-top:12px}
+.btn-link{display:inline-flex;align-items:center;text-decoration:none}
+.tip-groups{display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.tip-groups section{min-width:0}
+.tip-groups ul{list-style:none;margin:10px 0 0;padding:0}
+.tip-groups li{padding:10px 0;border-top:1px solid var(--line)}
+.tip-groups li b{display:block}
+.tip-groups li span{font-size:14px;color:var(--ink-2)}
+.msgcheck{display:grid;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+.msgcheck label{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--lv,var(--ink-2));width:0}
+@media (prefers-reduced-motion:no-preference){.meter i{transition:width .3s}}
+#toast{position:fixed;inset-inline:0;bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;z-index:30}
+#toast span{background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:6px;font-size:14px}
+#toast[hidden]{display:none}
+@media (min-width:760px){
+  .result{grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:32px}
+}
+@media (min-width:900px){
+  .shell{grid-template-columns:200px minmax(0,1fr);grid-template-areas:"top top" "nav main";gap:24px}
+  .top{grid-area:top}
+  .nav{grid-area:nav;position:sticky;top:16px;inset-inline:auto;bottom:auto;align-self:start;flex-direction:column;border:1px solid var(--line);border-radius:10px;padding:8px;z-index:auto}
+  .nav a{flex-direction:row;font-size:14.5px;gap:10px;padding:8px;justify-content:flex-start}
+  .nav .ic{width:34px;height:30px;border-radius:8px}
+  main{grid-area:main;padding-bottom:40px}
+  #toast{bottom:24px}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <svg width="42" height="46" viewBox="0 0 42 46" aria-hidden="true">
+        <path d="M21 2 4 8v14c0 11 7.5 19 17 22 9.500-3 17-11 17-22V8L21 2Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M13 24h16M13 17h16M13 31h9" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="29" cy="31" r="3.400" fill="var(--accent)"/>
+      </svg>
+      <div>
+        <div class="brand-name">AEGIS</div>
+        <div class="brand-sub">فحص وتحليل أمني لروابطك وكلمات مرورك ومواقعك</div>
+      </div>
+    </div>
+    <span class="local">يعمل على جهازك ولا يرسل بياناتك</span>
+  </header>
+
+  <nav class="nav" aria-label="أقسام التطبيق" id="nav">
+    <a href="#links" data-nav="links"><span class="ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></span>الروابط</a>
+    <a href="#password" data-nav="password"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg></span>كلمات المرور</a>
+    <a href="#site" data-nav="site"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.200 3 14.800 0 18M12 3c-3 3.200-3 14.800 0 18"/></svg></span>المواقع</a>
+    <a href="#report" data-nav="report"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>التقرير</a>
+    <a href="#tips" data-nav="tips"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.500 8 8 9 4.500-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>النصائح</a>
+  </nav>
+
+  <main>
+    <!-- الروابط -->
+    <section data-view="links">
+      <div class="head">
+        <h1>فحص الروابط المشبوهة</h1>
+        <p class="lede">الصق أي رابط وصلك لتعرف هل يشبه أنماط التصيّد والاحتيال. لا يُفتح الرابط ولا يُرسل إلى أي جهة.</p>
+      </div>
+      <form id="urlForm" autocomplete="off">
+        <label class="lbl" for="urlInput">الرابط</label>
+        <div class="row">
+          <input id="urlInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" value="http://paypal-secure-login.account-verify.xyz/signin?user=1&amp;redirect=http://pay-check.example">
+          <button class="btn primary" type="submit">افحص الرابط</button>
+        </div>
+      </form>
+      <div id="urlResult" aria-live="polite"></div>
+    </section>
+
+    <!-- كلمات المرور -->
+    <section data-view="password" hidden>
+      <div class="head">
+        <h1>اختبار قوة كلمة المرور</h1>
+        <p class="lede">تُحلَّل الكلمة داخل هذه الصفحة فقط، ولا تُحفظ ولا تغادر جهازك.</p>
+      </div>
+      <div>
+        <label class="lbl" for="pwInput">كلمة المرور</label>
+        <div class="row">
+          <input id="pwInput" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="Pa$$w0rd2024">
+          <button class="btn" type="button" id="pwToggle">إظهار</button>
+        </div>
+        <p class="note" id="pwNote">النتيجة أدناه لكلمة تجريبية. اكتب كلمتك لتُحلَّل.</p>
+      </div>
+      <div id="pwResult" aria-live="polite"></div>
+      <div class="gen">
+        <h2>مولّد كلمات مرور عشوائية</h2>
+        <div class="row">
+          <input id="genOut" type="text" readonly aria-label="كلمة المرور المولَّدة">
+          <button class="btn" type="button" id="genCopy">نسخ</button>
+          <button class="btn primary" type="button" id="genNew">توليد</button>
+        </div>
+        <div>
+          <label class="lbl" for="genLen">الطول: <span class="mono" id="genLenVal">18</span></label>
+          <input id="genLen" type="range" min="10" max="40" value="18">
+        </div>
+        <div class="opts">
+          <label><input type="checkbox" id="gLo" checked> أحرف صغيرة</label>
+          <label><input type="checkbox" id="gUp" checked> أحرف كبيرة</label>
+          <label><input type="checkbox" id="gDi" checked> أرقام</label>
+          <label><input type="checkbox" id="gSy" checked> رموز</label>
+          <label><input type="checkbox" id="gAm"> استبعاد الأحرف المتشابهة (l 1 I O 0)</label>
+        </div>
+        <div><button class="btn small" type="button" id="genCheck">فحص هذه الكلمة أعلاه</button></div>
+      </div>
+    </section>
+
+    <!-- المواقع -->
+    <section data-view="site" hidden>
+      <div class="head">
+        <h1>تحليل معلومات الموقع</h1>
+        <p class="lede">يفكّك العنوان إلى أجزائه ويقيّم خطورته، ويفتح لك أدوات خارجية موثوقة للفحص العميق للشهادة والتسجيل والسمعة.</p>
+      </div>
+      <form id="siteForm" autocomplete="off">
+        <label class="lbl" for="siteInput">اسم الموقع أو رابطه</label>
+        <div class="row">
+          <input id="siteInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" value="https://accounts.google.com/signin">
+          <button class="btn primary" type="submit">حلّل الموقع</button>
+        </div>
+      </form>
+      <div id="siteResult" aria-live="polite"></div>
+    </section>
+
+    <!-- التقرير -->
+    <section data-view="report" hidden>
+      <div class="head">
+        <h1>تقرير الفحوصات وتقييم المخاطر</h1>
+        <p class="lede">ملخص ما فحصته على هذا الجهاز. يُحفظ اسم النطاق ودرجته فقط، دون الرابط الكامل ودون أي كلمة مرور.</p>
+      </div>
+      <div id="reportBody"></div>
+    </section>
+
+    <!-- النصائح -->
+    <section data-view="tips" hidden>
+      <div class="head">
+        <h1>نصائح الحماية من الاختراق والتصيّد</h1>
+        <p class="lede">عادات قليلة تمنع معظم الاختراقات الشائعة.</p>
+      </div>
+      <div class="tip-groups" id="tipGroups"></div>
+      <div class="msgcheck">
+        <h2>هل هذه الرسالة تصيّد؟</h2>
+        <p class="lede">حدّد ما ينطبق على الرسالة التي وصلتك.</p>
+        <div id="msgItems"></div>
+        <div class="meter" id="msgMeter" role="img" aria-label="مؤشر خطورة الرسالة"><i></i></div>
+        <p id="msgVerdict" aria-live="polite">لم تحدّد شيئًا بعد.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="toast" hidden role="status" aria-live="polite"><span></span></div>
+
+<script>
+(function () {
+  'use strict';
+  document.documentElement.lang = 'ar';
+  document.documentElement.dir = 'rtl';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var trunc = function (s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+
+  /* ---------- بيانات مرجعية ---------- */
+  var SUS_TLD = new Set(['xyz','top','tk','ml','ga','cf','gq','click','link','zip','mov','work','support','rest','icu','buzz','cyou','monster','loan','country','gdn','men','date','racing','review','download','stream','cam','sbs','cfd']);
+  var TRUST_TLD = new Set(['com','org','net','co','me','tv']);
+  var SHORT = new Set(['bit.ly','tinyurl.com','t.co','goo.gl','is.gd','cutt.ly','ow.ly','rb.gy','shorturl.at','tiny.cc','buff.ly','rebrand.ly','t.ly','s.id','v.gd','lnkd.in']);
+  var TWO = new Set(['co.uk','org.uk','gov.uk','ac.uk','com.au','co.jp','co.in','co.il','co.za','co.nz','co.kr','com.br','com.mx','com.cn','com.tr','com.sg','com.sa','net.sa','org.sa','gov.sa','edu.sa','com.ae','com.kw','com.qa','com.jo','com.lb','com.sy','com.ye','com.eg','com.iq','gov.iq','edu.iq','org.iq','net.iq','mil.iq']);
+  var BRANDS = [
+    { n: 'paypal', ok: ['paypal'] }, { n: 'google', ok: ['google','youtube','gmail','gstatic','googleapis'] },
+    { n: 'facebook', ok: ['facebook','fb','fbcdn','meta','messenger'] }, { n: 'instagram', ok: ['instagram','cdninstagram'] },
+    { n: 'whatsapp', ok: ['whatsapp','wa'] }, { n: 'microsoft', ok: ['microsoft','live','office','outlook','microsoftonline','windows','bing'] },
+    { n: 'apple', ok: ['apple','icloud'] }, { n: 'amazon', ok: ['amazon','amazonaws','aws'] },
+    { n: 'netflix', ok: ['netflix'] }, { n: 'telegram', ok: ['telegram','t'] }, { n: 'tiktok', ok: ['tiktok','tiktokv'] },
+    { n: 'twitter', ok: ['twitter','x','t'] }, { n: 'binance', ok: ['binance'] }, { n: 'linkedin', ok: ['linkedin'] },
+    { n: 'snapchat', ok: ['snapchat'] }, { n: 'dropbox', ok: ['dropbox'] }, { n: 'asiacell', ok: ['asiacell'] }, { n: 'zain', ok: ['zain'] }
+  ];
+  var KEYWORDS = ['login','log-in','signin','sign-in','verify','verification','secure','security','account','update','confirm','banking','password','wallet','billing','invoice','support','recover','unlock','suspend','limited','claim','gift','prize','bonus','otp','webscr','validate','تحقق','تسجيل','حسابك','هدية','جائزة'];
+  var EXEC_RE = /\.(exe|apk|scr|msi|bat|cmd|jar|vbs|ps1|iso|dmg|docm|xlsm)(\?|#|$)/i;
+  var ARCH_RE = /\.(zip|rar|7z)(\?|#|$)/i;
+  var GEN = { com: 'نطاق تجاري عام', org: 'نطاق عام للمنظمات', net: 'نطاق عام للشبكات', info: 'نطاق عام للمعلومات', biz: 'نطاق عام للأعمال', edu: 'نطاق تعليمي مقيَّد', gov: 'نطاق حكومي مقيَّد', mil: 'نطاق عسكري مقيَّد', int: 'نطاق منظمات دولية مقيَّد', io: 'نطاق تقني شائع', dev: 'نطاق للمطورين', app: 'نطاق للتطبيقات', co: 'نطاق تجاري', me: 'نطاق شخصي', tv: 'نطاق وسائط' };
+  var CC = { iq: 'العراق', sa: 'السعودية', ae: 'الإمارات', eg: 'مصر', kw: 'الكويت', qa: 'قطر', bh: 'البحرين', om: 'عُمان', jo: 'الأردن', lb: 'لبنان', sy: 'سوريا', ye: 'اليمن', ly: 'ليبيا', tn: 'تونس', dz: 'الجزائر', ma: 'المغرب', sd: 'السودان', ps: 'فلسطين', tr: 'تركيا', ir: 'إيران', us: 'الولايات المتحدة', uk: 'بريطانيا', de: 'ألمانيا', fr: 'فرنسا', in: 'الهند', cn: 'الصين', ru: 'روسيا', jp: 'اليابان', kr: 'كوريا الجنوبية', br: 'البرازيل', au: 'أستراليا', ca: 'كندا', nl: 'هولندا', it: 'إيطاليا', es: 'إسبانيا' };
+
+  function tldKind(t) {
+    if (SUS_TLD.has(t)) return 'امتداد رخيص يكثر استخدامه في الاحتيال';
+    if (GEN[t]) return GEN[t];
+    if (CC[t]) return 'امتداد دولة: ' + CC[t];
+    if (t.length === 2) return 'امتداد دولة';
+    return 'امتداد عام حديث';
+  }
+
+  function lev(a, b) {
+    if (Math.abs(a.length - b.length) > 1) return 9;
+    var prev = [], i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      var cur = [i];
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      }
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  /* ---------- تحليل الروابط ---------- */
+  function splitHost(host) {
+    var labels = host.split('.');
+    var regN = 2;
+    if (labels.length >= 3 && TWO.has(labels.slice(-2).join('.'))) regN = 3;
+    if (labels.length < regN) regN = labels.length;
+    return {
+      labels: labels,
+      reg: labels.slice(-regN).join('.'),
+      sub: labels.slice(0, labels.length - regN).join('.'),
+      sld: labels[labels.length - regN],
+      tld: labels[labels.length - 1]
+    };
+  }
+
+  function levelOf(score) {
+    if (score < 20) return { key: 'low', label: 'منخفضة' };
+    if (score < 45) return { key: 'mid', label: 'متوسطة' };
+    if (score < 70) return { key: 'high', label: 'مرتفعة' };
+    return { key: 'crit', label: 'حرجة' };
+  }
+  var VERDICT = {
+    low: 'لم تظهر مؤشرات خطر واضحة في بنية الرابط. هذا لا يضمن سلامته، فتأكد من المرسل قبل إدخال أي بيانات.',
+    mid: 'توجد مؤشرات تستدعي الحذر. لا تُدخل بيانات حساسة قبل التأكد من مصدر الرابط.',
+    high: 'يحمل الرابط عدة علامات شائعة في التصيّد. الأفضل ألا تفتحه.',
+    crit: 'يطابق الرابط أنماط الاحتيال بقوة. لا تفتحه ولا تُدخل أي بيانات، وأبلغ عنه.'
+  };
+
+  function analyzeUrl(raw) {
+    var s = String(raw || '').trim().replace(/\s+/g, '');
+    if (!s) return { error: 'empty' };
+    if (s.length > 2048) return { error: 'long' };
+    var F = [];
+    var add = function (sev, title, detail, pts) { F.push({ sev: sev, title: title, detail: detail, pts: pts || 0 }); };
+
+    var sp = s.match(/^(javascript|data|vbscript|file):/i);
+    if (sp) {
+      add('bad', 'نوع رابط غير ويب', 'الروابط التي تبدأ بـ ' + sp[1].toLowerCase() + ': تنفّذ شيفرة أو تعرض محتوى مضمّنًا بدل فتح موقع، وتُستخدم في الخداع.', 95);
+      return { ok: true, special: sp[1].toLowerCase(), input: s, host: sp[1].toLowerCase() + ':', findings: F, score: 95, level: levelOf(95) };
+    }
+
+    var hadScheme = /^[a-z][a-z0-9+.\-]*:\/\//i.test(s);
+    var u;
+    try { u = new URL(hadScheme ? s : 'http://' + s); } catch (e) { return { error: 'bad' }; }
+    var host = u.hostname.toLowerCase().replace(/\.$/, '');
+    if (!host) return { error: 'bad' };
+    var scheme = u.protocol.slice(0, -1);
+    var isIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.indexOf(':') > -1;
+    var parts = isIP ? { labels: [host], reg: host, sub: '', sld: host, tld: '' } : splitHost(host);
+    var path = u.pathname, query = u.search;
+    var decoded = path;
+    try { decoded = decodeURIComponent(path); } catch (e2) {}
+    decoded = decoded.toLowerCase();
+
+    if (!hadScheme) add('info', 'لا يتضمن الرابط بروتوكولًا', 'افترضنا http أثناء التحليل. ' + (isIP ? '' : 'الأفضل أن تفتح المواقع المهمة بكتابة عنوانها يدويًا.'), 0);
+
+    // البروتوكول
+    if (scheme === 'https') add('ok', 'اتصال مشفّر (HTTPS)', 'التشفير لا يعني أن الموقع صادق، لكن غيابه يعني أن بياناتك تُرسل مكشوفة.', 0);
+    else if (scheme === 'http') add('bad', 'اتصال غير مشفّر (HTTP)', 'أي بيانات تُدخلها يمكن اعتراضها. المواقع الجادة تستخدم HTTPS.', 15);
+    else add('warn', 'بروتوكول غير معتاد: ' + scheme, 'معظم الروابط الآمنة تستخدم http أو https.', 10);
+
+    if (u.username || u.password) add('bad', 'يحتوي على بيانات قبل علامة @', 'ما قبل @ يُكتب ليبدو كاسم موقع موثوق بينما الوجهة الحقيقية بعدها.', 30);
+
+    if (isIP) add('bad', 'العنوان رقم IP بدل اسم موقع', 'المواقع المعروفة تستخدم أسماء نطاقات. عناوين IP الخام شائعة في البرمجيات الخبيثة.', 30);
+
+    var trusted = false;
+    if (!isIP) {
+      trusted = BRANDS.some(function (b) { return b.ok.indexOf(parts.sld) > -1; }) && TRUST_TLD.has(parts.tld) && parts.labels.length - parts.reg.split('.').length < 4;
+      if (trusted) add('ok', 'النطاق الفعلي يطابق علامة معروفة', parts.reg + ' هو النطاق المسجّل، وليس مجرد اسم يظهر في أول الرابط.', 0);
+
+      if (SHORT.has(parts.reg)) add('warn', 'رابط مختصر', 'الاختصار يخفي الوجهة الحقيقية. افتحه في أداة توسيع الروابط قبل الضغط.', 20);
+      if (SUS_TLD.has(parts.tld)) add('warn', 'امتداد نطاق عالي الخطورة: .' + parts.tld, 'هذه الامتدادات رخيصة أو مجانية ويكثر فيها التصيّد.', 15);
+      if (host.indexOf('xn--') > -1) add('bad', 'نطاق مرمَّز (Punycode)', 'قد يحتوي أحرفًا تشبه الأحرف اللاتينية (هجوم المتشابهات البصرية) كي يشبه موقعًا معروفًا.', 20);
+      if (/https?/.test(host)) add('warn', 'كلمة http/https داخل اسم النطاق', 'تُضاف لتوهمك بأن الاتصال آمن.', 10);
+
+      var hy = (host.match(/-/g) || []).length;
+      if (hy >= 3) add('warn', 'شرطات كثيرة في الاسم (' + hy + ')', 'الأسماء المركّبة الطويلة شائعة في النطاقات المزيفة.', 10);
+      else if (hy === 2) add('info', 'شرطتان في اسم النطاق', 'ليست دليلًا وحدها لكنها تتكرر في النطاقات المزيفة.', 4);
+
+      var depth = parts.labels.length - parts.reg.split('.').length;
+      if (depth >= 3) add('warn', 'نطاقات فرعية كثيرة (' + depth + ')', 'تُستخدم لإخفاء النطاق الحقيقي في آخر الاسم.', 10);
+
+      if (host.length > 12 && (host.replace(/\D/g, '').length / host.length) > 0.3) add('warn', 'نسبة أرقام عالية في الاسم', 'الأسماء المولّدة آليًا تكثر فيها الأرقام.', 5);
+
+      // انتحال العلامات التجارية
+      var imp = null, look = null, lowSld = parts.sld;
+      var toks = host.split(/[.\-]/);
+      BRANDS.forEach(function (b) {
+        if (b.ok.indexOf(lowSld) > -1) return;
+        var hit = toks.some(function (t) { return t === b.n || (b.n.length >= 6 && t.indexOf(b.n) > -1); });
+        if (hit && !imp) imp = b.n;
+        if (!hit && b.n.length >= 5 && !look) {
+          var v1 = lowSld.replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e').replace(/5/g, 's').replace(/rn/g, 'm').replace(/vv/g, 'w');
+          var v2 = v1.replace(/l/g, 'i');
+          if (v1.indexOf(b.n) > -1 || v2.indexOf(b.n) > -1 || (b.n.length >= 6 && lev(lowSld, b.n) === 1)) look = b.n;
+        }
+      });
+      if (imp) add('bad', 'يستخدم اسم علامة معروفة (' + imp + ') داخل نطاق غير تابع لها', 'النطاق الحقيقي هو ' + parts.reg + ' وليس موقع ' + imp + '. هذا أشهر أساليب التصيّد.', 35);
+      else if (look) add('bad', 'اسم يشبه علامة معروفة (' + look + ') بتغيير بسيط', 'استبدال حرف أو رقم واحد يخدع النظر السريع.', 35);
+
+      if (!trusted) {
+        var hk = KEYWORDS.filter(function (k) { return host.indexOf(k) > -1; });
+        if (hk.length >= 2) add('warn', 'كلمات حساسة في اسم النطاق', 'وردت: ' + hk.slice(0, 4).join('، ') + '. المواقع الأصلية نادرًا ما تضعها كلها في العنوان.', 12);
+        else if (hk.length === 1) add('info', 'كلمة حساسة في اسم النطاق: ' + hk[0], 'تظهر كثيرًا في الصفحات المزيفة.', 6);
+        var pk = KEYWORDS.filter(function (k) { return decoded.indexOf(k) > -1; });
+        if (pk.length) add('info', 'كلمات حساسة في المسار', 'وردت: ' + pk.slice(0, 4).join('، ') + '.', Math.min(8, pk.length * 4));
+      }
+    }
+
+    if (u.port && u.port !== '80' && u.port !== '443') add('warn', 'منفذ غير معتاد: ' + u.port, 'المواقع العادية لا تحتاج إلى منفذ ظاهر في العنوان.', 10);
+
+    if (EXEC_RE.test(path)) add('bad', 'الرابط يشير إلى ملف تنفيذي أو خطر', 'ملفات مثل exe وapk وiso قد تثبّت برمجيات خبيثة.', 25);
+    else if (ARCH_RE.test(path)) add('warn', 'الرابط يشير إلى ملف مضغوط', 'الملفات المضغوطة تُستخدم لتمرير برمجيات خبيثة. لا تفتحها من مصدر غير موثوق.', 12);
+
+    if (/(^|[?&])(url|redirect|redir|next|return|goto|dest|continue)=https?/i.test(query) || /https?%3a/i.test(query)) add('warn', 'يعيد التوجيه إلى رابط آخر', 'يحمل الرابط عنوانًا ثانيًا في معاملاته قد يحوّلك إلى موقع مزيف.', 10);
+    if (/(^|[?&])[^=&]*(pass|pwd|token|session|secret|otp|card)[^=&]*=/i.test(query)) add('warn', 'بيانات حساسة داخل الرابط', 'وجود كلمة مرور أو رمز في الرابط يعرّضها للتسرب في السجلات.', 8);
+    if ((path.match(/%[0-9a-f]{2}/gi) || []).length > 3) add('warn', 'ترميز كثيف في المسار', 'يُستخدم لإخفاء المحتوى الحقيقي للرابط.', 8);
+    if (s.length > 120) add('warn', 'رابط طويل جدًا (' + s.length + ' حرفًا)', 'الطول الزائد يخفي الجزء المهم.', 12);
+    else if (s.length > 75) add('info', 'رابط طويل (' + s.length + ' حرفًا)', 'قد يخفي جزءًا مهمًا منه.', 8);
+
+    var score = Math.min(100, F.reduce(function (a, f) { return a + f.pts; }, 0));
+    var rank = { bad: 0, warn: 1, info: 2, ok: 3 };
+    F.sort(function (a, b) { return rank[a.sev] - rank[b.sev] || b.pts - a.pts; });
+    var q = {};
+    u.searchParams.forEach(function (v, k) { q[k] = 1; });
+    return {
+      ok: true, input: s, hadScheme: hadScheme, scheme: scheme, host: host, isIP: isIP,
+      parts: parts, port: u.port, path: path === '/' ? '' : path, query: query, hash: u.hash,
+      keys: Object.keys(q), segs: path.split('/').filter(Boolean).length, len: s.length,
+      trusted: trusted, findings: F, score: score, level: levelOf(score)
+    };
+  }
+
+  function defang(s) { return s.replace(/^http/i, 'hxxp').replace(/\./g, '[.]'); }
+
+  /* ---------- مكوّنات العرض ---------- */
+  var ICON = {
+    bad: '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.500 19 17.500H1L10 1.500Z"/><path d="M10 7v5M10 14.500v.5" stroke="var(--surface)" stroke-width="1.800" stroke-linecap="round" fill="none"/></svg>',
+    warn: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.800" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.500v.5" stroke-linecap="round"/></svg>',
+    ok: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="m6.500 10.200 2.400 2.400 4.600-4.800"/></svg>',
+    info: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.800" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6v.5" stroke-linecap="round"/></svg>'
+  };
+  var YES = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10.500 4 4 8-9"/></svg>';
+  var NO = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>';
+
+  function gauge(score, key, caption) {
+    var L = 251.33, off = (L * (1 - score / 100)).toFixed(1);
+    return '<div class="gauge lv-' + key + '"><svg viewBox="0 0 200 122" role="img" aria-label="' + esc(caption) + ': ' + score + ' من 100">' +
+      '<path class="g-track" d="M20 100 A80 80 0 0 1 180 100"/>' +
+      '<path class="g-fill" d="M20 100 A80 80 0 0 1 180 100" style="stroke-dasharray:' + L + ';stroke-dashoffset:' + off + '"/>' +
+      '<text class="g-num" x="100" y="94" text-anchor="middle">' + score + '</text>' +
+      '<text class="g-cap" x="100" y="118" text-anchor="middle">' + esc(caption) + '</text></svg></div>';
+  }
+
+  function findingsHtml(F) {
+    var bad = F.filter(function (f) { return f.sev === 'bad'; }).length;
+    var warn = F.filter(function (f) { return f.sev === 'warn'; }).length;
+    var ok = F.filter(function (f) { return f.sev === 'ok'; }).length;
+    return '<div><div class="sec-title"><h3>نتائج الفحص</h3><span>' + bad + ' خطر · ' + warn + ' تنبيه · ' + ok + ' إيجابي</span></div>' +
+      '<ul class="findings">' + F.map(function (f) {
+        return '<li class="sev-' + f.sev + '">' + ICON[f.sev] + '<div><div class="t">' + esc(f.title) + '</div><div class="d">' + esc(f.detail) + '</div></div>' +
+          '<span class="pts">' + (f.pts ? '+' + f.pts : '') + '</span></li>';
+      }).join('') + '</ul></div>';
+  }
+
+  function anatomyHtml(r) {
+    if (r.special) return '';
+    var p = r.parts, h;
+    if (r.isIP) h = '<span class="core">' + esc(r.host) + '</span>';
+    else {
+      var sub = p.sub ? '<span class="dim">' + esc(p.sub) + '.</span>' : '';
+      h = sub + '<span class="core">' + esc(p.reg) + '</span>';
+    }
+    return '<div><div class="sec-title"><h3>تشريح الرابط</h3></div><div class="anatomy"><span class="dim">' + esc(r.scheme) + '://</span>' + h +
+      (r.port ? '<span class="dim">:' + esc(r.port) + '</span>' : '') +
+      '<span class="dim">' + esc(trunc(r.path + r.query + r.hash, 90)) + '</span></div>' +
+      '<p class="anatomy-cap">المسطّر هو النطاق الفعلي للموقع. كل ما قبله مجرد تسميات يضعها صاحب النطاق كما يشاء.</p></div>';
+  }
+
+  function errorHtml(code) {
+    var m = { empty: 'اكتب أو الصق رابطًا أولًا.', long: 'الرابط أطول من الحد المسموح (2048 حرفًا).', bad: 'تعذّر قراءة هذا الرابط. تأكد من كتابته كاملًا مثل example.com/page.' };
+    return '<div class="empty">' + (m[code] || m.bad) + '</div>';
+  }
+
+  function renderUrl(r, example) {
+    var box = $('#urlResult');
+    if (r.error) { box.innerHTML = errorHtml(r.error); return; }
+    var L = r.level, shown = r.special ? r.input : r.input;
+    box.innerHTML = '<div class="result"><div class="verdict">' +
+      gauge(r.score, L.key, 'درجة الخطورة') +
+      '<span class="pill lv-' + L.key + '">خطورة ' + L.label + '</span>' +
+      (example ? '<span class="chip">مثال تجريبي</span>' : '') +
+      '<p>' + VERDICT[L.key] + '</p>' +
+      '<div class="defang"><code id="defangTxt">' + esc(trunc(defang(shown), 200)) + '</code><button class="btn small" type="button" data-copy="' + esc(defang(shown)) + '">نسخ نسخة آمنة</button></div>' +
+      '<p class="note">النسخة الآمنة لا تعمل كرابط عند مشاركتها مع الآخرين.</p></div>' +
+      '<div class="detail">' + anatomyHtml(r) + findingsHtml(r.findings) + '</div></div>';
+  }
+
+  /* ---------- السجل (على هذا الجهاز فقط) ---------- */
+  var HKEY = 'darae_history_v1', hist = [];
+  try { hist = JSON.parse(localStorage.getItem(HKEY) || '[]'); if (!Array.isArray(hist)) hist = []; } catch (e) { hist = []; }
+  function saveHist() { try { localStorage.setItem(HKEY, JSON.stringify(hist.slice(0, 60))); } catch (e) {} }
+  function addHist(kind, r) {
+    hist.unshift({ t: Date.now(), kind: kind, target: trunc(r.host, 70), score: r.score, key: r.level.key });
+    hist = hist.slice(0, 60); saveHist();
+  }
+  var lastPw = null;
+
+  /* ---------- نسخ وإشعار ---------- */
+  var toastT;
+  function toast(msg) {
+    var t = $('#toast'); t.firstElementChild.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+  function copyText(text, srcInput) {
+    var done = function () { toast('تم النسخ'); };
+    var fail = function () {
+      try {
+        if (srcInput) { srcInput.select(); if (document.execCommand('copy')) { done(); return; } }
+      } catch (e) {}
+      toast('تعذّر النسخ تلقائيًا، حدّد النص وانسخه يدويًا');
+    };
+    try { navigator.clipboard.writeText(text).then(done, fail); } catch (e) { fail(); }
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (b) copyText(b.getAttribute('data-copy'));
+  });
+
+  /* ---------- نماذج الروابط والمواقع ---------- */
+  var urlInput = $('#urlInput');
+  $('#urlForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var r = analyzeUrl(urlInput.value);
+    renderUrl(r, false);
+    if (r.ok) addHist('url', r);
+  });
+  urlInput.addEventListener('focus', function () { urlInput.select(); });
+
+  function factsHtml(r) {
+    var p = r.parts;
+    var rows = [];
+    var f = function (k, v, mono) { rows.push('<div><dt>' + k + '</dt><dd' + (mono ? ' class="mono"' : '') + '>' + v + '</dd></div>'); };
+    f('اسم المضيف', esc(r.host), true);
+    f('نوع العنوان', r.isIP ? 'رقم IP' : 'اسم نطاق');
+    if (!r.isIP) {
+      f('النطاق المسجَّل', esc(p.reg), true);
+      f('النطاق الفرعي', p.sub ? esc(p.sub) : 'لا يوجد', !!p.sub);
+      f('الامتداد (TLD)', '<span class="mono">.' + esc(p.tld) + '</span> · ' + esc(tldKind(p.tld)));
+      f('عدد أجزاء الاسم', String(p.labels.length));
+      f('ترميز Punycode', r.host.indexOf('xn--') > -1 ? 'نعم، قد يحوي أحرفًا متشابهة' : 'لا');
+    }
+    f('البروتوكول', esc(r.scheme) + (r.scheme === 'https' ? ' · مشفّر' : r.scheme === 'http' ? ' · غير مشفّر' : ''));
+    f('المنفذ', r.port ? '<span class="mono">' + esc(r.port) + '</span>' : 'الافتراضي');
+    f('المسار', r.path ? '<span class="mono">' + esc(trunc(r.path, 80)) + '</span> · ' + r.segs + ' مقطع' : 'الصفحة الرئيسية');
+    f('المعاملات', r.keys.length ? r.keys.length + ' معامل' : 'لا توجد');
+    f('طول العنوان', '<span class="mono">' + r.len + '</span> حرفًا');
+    return '<dl class="facts">' + rows.join('') + '</dl>' +
+      (r.keys.length ? '<div class="keys" aria-label="أسماء المعاملات">' + r.keys.slice(0, 12).map(function (k) { return '<code>' + esc(k) + '</code>'; }).join('') + '</div>' : '');
+  }
+  function extLinksHtml(r) {
+    var h = encodeURIComponent(r.isIP ? r.host : r.parts.reg);
+    var full = encodeURIComponent(r.host);
+    var L = [
+      ['VirusTotal', 'سمعة النطاق لدى عشرات محركات الفحص', r.isIP ? 'https://www.virustotal.com/gui/ip-address/' + full : 'https://www.virustotal.com/gui/domain/' + h]
+    ];
+    if (!r.isIP) {
+      L.push(['SSL Labs', 'فحص شهادة التشفير وإعدادات الخادم', 'https://www.ssllabs.com/ssltest/analyze.html?d=' + full]);
+      L.push(['WHOIS', 'تاريخ تسجيل النطاق وصاحبه إن كان ظاهرًا', 'https://who.is/whois/' + h]);
+      L.push(['Security Headers', 'ترويسات الحماية في استجابة الموقع', 'https://securityheaders.com/?q=' + full]);
+    }
+    return '<ul class="ext">' + L.map(function (x) {
+      return '<li><a href="' + x[2] + '" target="_blank" rel="noopener noreferrer"><b>' + x[0] + '</b><span>' + x[1] + '</span></a></li>';
+    }).join('') + '</ul>';
+  }
+  function renderSite(r, example) {
+    var box = $('#siteResult');
+    if (r.error) { box.innerHTML = errorHtml(r.error); return; }
+    if (r.special) { box.innerHTML = '<div class="empty">هذا ليس عنوان موقع. استخدم قسم فحص الروابط لتقييمه.</div>'; return; }
+    var L = r.level;
+    box.innerHTML = '<div class="result"><div class="verdict">' + gauge(r.score, L.key, 'درجة الخطورة') +
+      '<span class="pill lv-' + L.key + '">خطورة ' + L.label + '</span>' + (example ? '<span class="chip">مثال تجريبي</span>' : '') +
+      '<p>' + VERDICT[L.key] + '</p></div>' +
+      '<div class="detail"><div><div class="sec-title"><h3>معلومات أساسية</h3><span>من بنية العنوان</span></div>' + factsHtml(r) + '</div>' +
+      findingsHtml(r.findings) +
+      '<div><div class="sec-title"><h3>فحص أعمق بأدوات خارجية</h3></div>' + extLinksHtml(r) +
+      '<p class="note">تسجيل النطاق والشهادة والسمعة تحتاج اتصالًا بالشبكة، ولا يمكن لهذه الصفحة إجراؤه. الروابط أعلاه تفتح مواقع مستقلة في تبويب جديد.</p></div></div></div>';
+  }
+  var siteInput = $('#siteInput');
+  $('#siteForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var r = analyzeUrl(siteInput.value);
+    renderSite(r, false);
+    if (r.ok && !r.special) addHist('site', r);
+  });
+  siteInput.addEventListener('focus', function () { siteInput.select(); });
+
+  /* ---------- كلمات المرور ---------- */
+  var COMMON = new Set(['123456','123456789','12345678','password','qwerty','111111','12345','1234567','iloveyou','admin','welcome','123123','000000','abc123','password1','qwerty123','1q2w3e4r','654321','666666','123321','1234567890','monkey','dragon','letmein','football','master','sunshine','princess','login','passw0rd','starwars','hello','freedom','whatever','qazwsx','trustno1','987654321','mustafa','baghdad','iraq123','admin123','root','test','test123','guest','changeme','welcome1','secret','shadow','1qaz2wsx','qwertyuiop','asdfghjkl','zxcvbnm','11111111','12341234','00000000','abcd1234','samsung','google','facebook','pass','password123','p@ssw0rd','iloveu','superman','batman']);
+  var WORDS = ['password','pass','admin','welcome','login','qwerty','letmein','iloveyou','monkey','dragon','master','sunshine','princess','football','baghdad','iraq','basra','mosul','erbil','najaf','karbala','love','ali','omar','ahmed','ahmad','mohammed','muhammad','hassan','hussein','mustafa','zainab','fatima','sara','noor','nour','allah','habibi','shadow','superman','hello','freedom','whatever','summer','winter','spring','secret','google','facebook','apple','test','user','root','guest','abc','asd','zxc'].sort(function (a, b) { return b.length - a.length; });
+  var KB = ['qwertyuiop','asdfghjkl','zxcvbnm','1234567890','ضصثقفغعهخحجد','شسيبلاتنمكط','ئءؤرلاىةوزظ'];
+  KB = KB.concat(KB.map(function (r) { return r.split('').reverse().join(''); }));
+  var LEET = { '@': 'a', '4': 'a', '3': 'e', '1': 'i', '!': 'i', '0': 'o', '$': 's', '5': 's', '7': 't', '8': 'b' };
+  function leet(s, one) {
+    var o = '';
+    for (var i = 0; i < s.length; i++) { var c = s[i]; o += (c === '1' && one === 'l') ? 'l' : (LEET[c] || c); }
+    return o;
+  }
+
+  function analyzePw(pw) {
+    var n = pw.length, lower = pw.toLowerCase();
+    var has = { lo: /[a-z]/.test(pw), up: /[A-Z]/.test(pw), di: /\d/.test(pw), ar: /[؀-ۿ]/.test(pw), sy: /[^A-Za-z0-9؀-ۿ]/.test(pw) };
+    var pool = (has.lo ? 26 : 0) + (has.up ? 26 : 0) + (has.di ? 10 : 0) + (has.sy ? 33 : 0) + (has.ar ? 40 : 0) || 10;
+    var bpc = Math.log2(pool);
+    var cov = []; for (var z = 0; z < n; z++) cov[z] = false;
+    var bits = 0, found = {};
+    function free(i, len) { for (var k = i; k < i + len; k++) if (cov[k]) return false; return true; }
+    function mark(i, len, cost, tag) { for (var k = i; k < i + len; k++) cov[k] = true; bits += cost; found[tag] = true; }
+
+    var v1 = leet(lower, 'i'), v2 = leet(lower, 'l');
+    if (COMMON.has(lower) || COMMON.has(v1) || COMMON.has(v2)) {
+      return { bits: 10, pool: pool, len: n, found: { common: true }, has: has };
+    }
+    [v1, v2].forEach(function (v) {
+      WORDS.forEach(function (w) {
+        var from = 0, idx;
+        while ((idx = v.indexOf(w, from)) > -1) {
+          if (free(idx, w.length)) {
+            var leeted = v.substr(idx, w.length) !== lower.substr(idx, w.length);
+            var cased = pw.substr(idx, w.length) !== lower.substr(idx, w.length);
+            mark(idx, w.length, 12 + (leeted ? 1 : 0) + (cased ? 1 : 0), 'dict');
+          }
+          from = idx + 1;
+        }
+      });
+    });
+    var m, re = /(?:19|20)\d{2}/g;
+    while ((m = re.exec(pw)) !== null) if (free(m.index, 4)) mark(m.index, 4, 7, 'year');
+    re = /(.)\1{2,}/g;
+    while ((m = re.exec(pw)) !== null) if (free(m.index, m[0].length)) mark(m.index, m[0].length, 4 + Math.log2(m[0].length), 'rep');
+    for (var i = 0; i < n - 2;) {
+      var d = lower.charCodeAt(i + 1) - lower.charCodeAt(i);
+      if (Math.abs(d) === 1) {
+        var j = i + 1;
+        while (j + 1 < n && lower.charCodeAt(j + 1) - lower.charCodeAt(j) === d) j++;
+        var Ls = j - i + 1;
+        if (Ls >= 3 && free(i, Ls)) mark(i, Ls, 5 + Math.log2(Ls), 'seq');
+        i = j;
+      } else i++;
+    }
+    for (var a = 0; a < n - 2; a++) {
+      var best = 0;
+      for (var r = 0; r < KB.length && best < 3; r++) {
+        for (var L = Math.min(n - a, KB[r].length); L >= 3; L--) {
+          if (KB[r].indexOf(lower.substr(a, L)) > -1) { if (L > best) best = L; break; }
+        }
+      }
+      if (best >= 3 && free(a, best)) { mark(a, best, 6 + Math.log2(best), 'kbd'); a += best - 1; }
+    }
+    for (var k = 0; k < n; k++) if (!cov[k]) bits += bpc;
+    return { bits: Math.max(1, bits), pool: pool, len: n, found: found, has: has };
+  }
+
+  function pwLevel(b) {
+    if (b < 28) return { key: 'crit', label: 'ضعيفة جدًا' };
+    if (b < 40) return { key: 'high', label: 'ضعيفة' };
+    if (b < 60) return { key: 'mid', label: 'مقبولة' };
+    if (b < 80) return { key: 'low', label: 'قوية' };
+    return { key: 'low', label: 'قوية جدًا' };
+  }
+  var UNITS = [
+    [60, ['ثانية', 'ثانيتان', 'ثوانٍ', 'ثانية']], [60, ['دقيقة', 'دقيقتان', 'دقائق', 'دقيقة']],
+    [24, ['ساعة', 'ساعتان', 'ساعات', 'ساعة']], [30, ['يوم', 'يومان', 'أيام', 'يومًا']],
+    [12, ['شهر', 'شهران', 'أشهر', 'شهرًا']]
+  ];
+  function plural(n, f) { return n === 1 ? f[0] : n === 2 ? f[1] : n <= 10 ? n + ' ' + f[2] : n + ' ' + f[3]; }
+  function fmtDur(sec) {
+    if (sec < 1) return 'أقل من ثانية';
+    var v = sec, i;
+    for (i = 0; i < UNITS.length; i++) {
+      if (v < UNITS[i][0]) return plural(Math.max(1, Math.round(v)), UNITS[i][1]);
+      v = v / UNITS[i][0];
+    }
+    var yrs = v;
+    if (yrs < 1000) return plural(Math.max(1, Math.round(yrs)), ['سنة', 'سنتان', 'سنوات', 'سنة']);
+    if (yrs < 1e6) return 'آلاف السنين';
+    if (yrs < 1e9) return 'ملايين السنين';
+    return 'مليارات السنين';
+  }
+
+  var pwInput = $('#pwInput'), pwExample = true;
+  function renderPw() {
+    var box = $('#pwResult'), pw = pwInput.value;
+    if (!pw) { lastPw = null; box.innerHTML = '<div class="empty">اكتب كلمة مرور لتظهر نتيجة تحليلها هنا.</div>'; return; }
+    var a = analyzePw(pw), lv = pwLevel(a.bits), score = Math.min(100, Math.round(a.bits * 100 / 90));
+    if (!pwExample) lastPw = { score: score, label: lv.label, key: lv.key };
+    var half = Math.pow(2, a.bits - 1);
+    var f = a.found, h = a.has;
+    var checks = [
+      [a.len >= 12, '12 حرفًا أو أكثر'], [h.lo && h.up, 'أحرف كبيرة وصغيرة'], [h.di, 'أرقام'], [h.sy, 'رموز خاصة'],
+      [!f.common && !f.dict, 'خالية من الكلمات والأسماء الشائعة'], [!(f.seq || f.kbd || f.rep || f.year), 'خالية من التسلسلات والتكرار والسنوات']
+    ];
+    var tips = [];
+    if (f.common) tips.push('هذه الكلمة من أوائل ما يجرّبه المخترقون. غيّرها بالكامل.');
+    if (f.dict) tips.push('تجنّب الكلمات والأسماء حتى لو استبدلت حروفها بأرقام ورموز (مثل a بـ @).');
+    if (f.year) tips.push('تجنّب السنوات وتواريخ الميلاد، فهي من أسهل التخمينات.');
+    if (f.seq || f.kbd) tips.push('تجنّب التسلسلات مثل 123 وabc وصفوف لوحة المفاتيح مثل qwerty.');
+    if (f.rep) tips.push('تجنّب تكرار الحرف نفسه عدة مرات متتالية.');
+    if (a.len < 12) tips.push('أطل الكلمة إلى 12 حرفًا على الأقل، والأفضل 16 فأكثر.');
+    if (!(h.lo && h.up) && !h.ar) tips.push('اخلط الأحرف الكبيرة والصغيرة.');
+    if (!h.sy) tips.push('أضف رمزًا واحدًا على الأقل أو اجعلها عبارة طويلة من عدة كلمات عشوائية.');
+    if (!tips.length) tips.push('كلمة جيدة. استخدمها لحساب واحد فقط، وفعّل التحقق بخطوتين.');
+    var verdictTxt = { crit: 'يمكن تخمينها خلال لحظات. لا تستخدمها.', high: 'ضعيفة أمام هجمات التخمين الآلي. غيّرها.', mid: 'مقبولة للحسابات العادية، وضعيفة لحساب مهم.', low: 'صعبة التخمين بالطرق الشائعة.' }[lv.key];
+    box.innerHTML = '<div class="result"><div class="verdict">' + gauge(score, lv.key, 'قوة الكلمة') +
+      '<span class="pill lv-' + lv.key + '">' + lv.label + '</span>' + (pwExample ? '<span class="chip">كلمة تجريبية</span>' : '') +
+      '<p>' + verdictTxt + '</p></div>' +
+      '<div class="detail"><div class="metrics">' +
+      '<div><b>الطول</b><span class="mono">' + a.len + '</span></div>' +
+      '<div><b>العشوائية الفعلية (إنتروبيا)</b><span class="mono">' + Math.round(a.bits) + ' بت</span></div>' +
+      '<div><b>تخمين مباشر على موقع (100 محاولة/ث)</b><span>' + fmtDur(half / 100) + '</span></div>' +
+      '<div><b>تخمين بعد تسريب قاعدة بيانات (10 مليار/ث)</b><span>' + fmtDur(half / 1e10) + '</span></div></div>' +
+      '<div><div class="sec-title"><h3>المعايير</h3></div><ul class="checks">' +
+      checks.map(function (c) { return '<li class="' + (c[0] ? 'y' : 'n') + '">' + (c[0] ? YES : NO) + c[1] + '</li>'; }).join('') + '</ul></div>' +
+      '<div><div class="sec-title"><h3>ما الذي تحسّنه</h3></div><ul class="tips-list">' + tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+      '<p class="note">التقدير يفترض مهاجمًا يعرف أنماط الكلمات الشائعة. هو مؤشر وليس ضمانًا.</p></div></div></div>';
+  }
+  var pwT;
+  pwInput.addEventListener('focus', function () {
+    if (pwExample) { pwInput.value = ''; pwExample = false; $('#pwNote').textContent = 'التحليل يتم لحظيًا أثناء الكتابة ولا يُحفظ.'; renderPw(); }
+  });
+  pwInput.addEventListener('input', function () {
+    pwExample = false; clearTimeout(pwT); pwT = setTimeout(renderPw, 120);
+  });
+  $('#pwToggle').addEventListener('click', function () {
+    var show = pwInput.type === 'password';
+    pwInput.type = show ? 'text' : 'password'; this.textContent = show ? 'إخفاء' : 'إظهار';
+  });
+
+  /* المولّد */
+  function rnd(n) {
+    var lim = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1);
+    do { crypto.getRandomValues(a); } while (a[0] >= lim);
+    return a[0] % n;
+  }
+  function generate() {
+    var len = +$('#genLen').value, am = $('#gAm').checked;
+    var sets = [];
+    if ($('#gLo').checked) sets.push('abcdefghijklmnopqrstuvwxyz');
+    if ($('#gUp').checked) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    if ($('#gDi').checked) sets.push('0123456789');
+    if ($('#gSy').checked) sets.push('!@#$%^&*()-_=+[]{};:,.?');
+    if (!sets.length) { $('#gLo').checked = true; sets.push('abcdefghijklmnopqrstuvwxyz'); }
+    if (am) sets = sets.map(function (s) { return s.replace(/[l1IO0]/g, ''); });
+    var all = sets.join(''), out = [], i;
+    for (i = 0; i < sets.length; i++) out.push(sets[i][rnd(sets[i].length)]);
+    while (out.length < len) out.push(all[rnd(all.length)]);
+    for (i = out.length - 1; i > 0; i--) { var j = rnd(i + 1), t = out[i]; out[i] = out[j]; out[j] = t; }
+    $('#genOut').value = out.join('');
+  }
+  $('#genNew').addEventListener('click', generate);
+  $('#genLen').addEventListener('input', function () { $('#genLenVal').textContent = this.value; generate(); });
+  ['gLo', 'gUp', 'gDi', 'gSy', 'gAm'].forEach(function (id) { $('#' + id).addEventListener('change', generate); });
+  $('#genCopy').addEventListener('click', function () { copyText($('#genOut').value, $('#genOut')); });
+  $('#genCheck').addEventListener('click', function () {
+    pwExample = false; pwInput.value = $('#genOut').value; $('#pwNote').textContent = 'التحليل يتم لحظيًا أثناء الكتابة ولا يُحفظ.'; renderPw();
+    pwInput.scrollIntoView({ block: 'center' });
+  });
+
+  /* ---------- التقرير ---------- */
+  var KINDS = { url: 'رابط', site: 'موقع' };
+  var LV = { low: 'منخفضة', mid: 'متوسطة', high: 'مرتفعة', crit: 'حرجة' };
+  function fmtTime(ts) {
+    try { return new Intl.DateTimeFormat('ar-IQ-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }).format(ts); }
+    catch (e) { return new Date(ts).toLocaleString(); }
+  }
+  var clearArm = false, clearT;
+  function renderReport() {
+    var box = $('#reportBody');
+    var total = hist.length, risky = hist.filter(function (h) { return h.key === 'high' || h.key === 'crit'; }).length;
+    var cnt = { low: 0, mid: 0, high: 0, crit: 0 };
+    hist.forEach(function (h) { cnt[h.key]++; });
+    var pwTile = lastPw ? '<b class="lv-' + lastPw.key + '" style="color:var(--lv)">' + esc(lastPw.label) + '</b>' : '<b>—</b>';
+    var tiles = '<div class="tiles">' +
+      '<div class="tile"><b>' + total + '</b><span>فحوصات للروابط والمواقع</span></div>' +
+      '<div class="tile"><b class="' + (risky ? 'lv-high' : '') + '" style="' + (risky ? 'color:var(--lv)' : '') + '">' + risky + '</b><span>نتائج بخطورة مرتفعة أو حرجة</span></div>' +
+      '<div class="tile">' + pwTile + '<span>' + (lastPw ? 'آخر كلمة مرور اختبرتها' : 'لم تختبر كلمة مرور في هذه الجلسة') + '</span></div></div>';
+    if (!total) {
+      box.innerHTML = tiles + '<div class="empty">لا توجد فحوصات محفوظة بعد. افحص رابطًا أو موقعًا وسيظهر تقييم المخاطر هنا.' +
+        '<div class="row"><a class="btn primary btn-link" href="#links">افحص رابطًا</a><a class="btn btn-link" href="#site">حلّل موقعًا</a></div></div>';
+      return;
+    }
+    var recent = hist.slice(0, 10), worst = recent.reduce(function (a, h) { return Math.max(a, h.score); }, 0), wl = levelOf(worst);
+    var seg = ['low', 'mid', 'high', 'crit'].filter(function (k) { return cnt[k]; }).map(function (k) {
+      return '<i class="lv-' + k + '" style="width:' + (cnt[k] / total * 100) + '%"></i>';
+    }).join('');
+    var legend = ['low', 'mid', 'high', 'crit'].map(function (k) {
+      return '<span class="lv-' + k + '"><em></em>' + LV[k] + ' <b class="mono">' + cnt[k] + '</b></span>';
+    }).join('');
+    var rows = hist.slice(0, 30).map(function (h, i) {
+      return '<li><div><div class="tg">' + esc(h.target) + '</div><div class="mt">' + KINDS[h.kind] + ' · ' + esc(fmtTime(h.t)) + '</div></div>' +
+        '<div class="act lv-' + h.key + '"><span class="mono">' + h.score + '</span><span class="pill">' + LV[h.key] + '</span>' +
+        '<button class="btn small" type="button" data-rescan="' + i + '">إعادة</button></div></li>';
+    }).join('');
+    box.innerHTML = tiles + '<div class="result"><div class="verdict">' + gauge(worst, wl.key, 'أعلى خطورة حديثة') +
+      '<span class="pill lv-' + wl.key + '">خطورة ' + wl.label + '</span>' +
+      '<p>أعلى درجة بين آخر ' + recent.length + ' فحوصات. ' + VERDICT[wl.key] + '</p></div>' +
+      '<div class="detail"><div><div class="sec-title"><h3>توزيع النتائج</h3><span>' + total + ' فحصًا</span></div><div class="dist" role="img" aria-label="توزيع الفحوصات حسب الخطورة">' + seg + '</div><div class="legend">' + legend + '</div></div>' +
+      '<div><div class="sec-title"><h3>سجل الفحوصات</h3><span>الأحدث أولًا</span></div><ul class="hist">' + rows + '</ul>' +
+      '<div class="row" style="margin-top:12px"><button class="btn small" type="button" id="repCopy">نسخ التقرير نصًا</button><button class="btn small" type="button" id="repClear">مسح السجل</button></div></div></div></div>';
+  }
+  document.addEventListener('click', function (e) {
+    var rs = e.target.closest('[data-rescan]');
+    if (rs) {
+      var h = hist[+rs.getAttribute('data-rescan')]; if (!h) return;
+      if (h.kind === 'site') { siteInput.value = h.target; location.hash = '#site'; var r1 = analyzeUrl(h.target); renderSite(r1, false); }
+      else { urlInput.value = h.target; location.hash = '#links'; var r2 = analyzeUrl(h.target); renderUrl(r2, false); }
+      return;
+    }
+    if (e.target.id === 'repCopy') {
+      var lines = ['تقرير AEGIS', 'عدد الفحوصات: ' + hist.length];
+      hist.slice(0, 30).forEach(function (h) { lines.push('[' + KINDS[h.kind] + '] ' + defang(h.target) + ' | ' + h.score + ' | ' + LV[h.key]); });
+      copyText(lines.join('\n'));
+    }
+    if (e.target.id === 'repClear') {
+      var b = e.target;
+      if (!clearArm) { clearArm = true; b.textContent = 'تأكيد المسح؟'; clearT = setTimeout(function () { clearArm = false; b.textContent = 'مسح السجل'; }, 4000); }
+      else { clearArm = false; clearTimeout(clearT); hist = []; saveHist(); renderReport(); }
+    }
+  });
+
+  /* ---------- النصائح ---------- */
+  var TIPS = [
+    ['الحماية من التصيّد', [
+      ['لا تضغط الرابط، اكتب العنوان بنفسك', 'إذا وصلتك رسالة من بنك أو منصة، افتح التطبيق الرسمي أو اكتب عنوان الموقع يدويًا.'],
+      ['اضغط مطولًا لترى الوجهة', 'اعرض العنوان الحقيقي قبل فتحه وقارن اسم النطاق الأخير بالموقع الرسمي.'],
+      ['الاستعجال علامة إنذار', 'عبارات مثل "سيُغلق حسابك خلال ساعة" تهدف إلى منعك من التفكير.'],
+      ['لا تشارك رمز التحقق (OTP) أبدًا', 'لا تطلب أي جهة حقيقية هذا الرمز منك، حتى لو ادّعى المتصل أنه موظف.'],
+      ['احذر المرفقات غير المتوقعة', 'ملفات zip وapk وexe وملفات المكتب التي تطلب تفعيل وحدات الماكرو.']
+    ]],
+    ['كلمات المرور', [
+      ['كلمة فريدة لكل حساب', 'تسريب موقع واحد يفتح بقية حساباتك إذا كررت الكلمة.'],
+      ['الطول أهم من التعقيد', 'عبارة من أربع كلمات عشوائية أو أكثر أقوى وأسهل حفظًا من كلمة قصيرة مليئة بالرموز.'],
+      ['استخدم مدير كلمات مرور', 'يولّد كلمات طويلة فريدة ويملؤها لك، ولا يملؤها في مواقع مزيفة.'],
+      ['تجنّب المعلومات الشخصية', 'الأسماء وتواريخ الميلاد وأرقام الهواتف أول ما يُجرَّب.'],
+      ['افحص تسريب بريدك', 'ابحث عن بريدك في haveibeenpwned.com وغيّر كلمات الحسابات المتأثرة.']
+    ]],
+    ['الحسابات والأجهزة', [
+      ['فعّل التحقق بخطوتين', 'يفضَّل تطبيق مصادقة أو مفتاح أمان بدل الرسائل النصية.'],
+      ['حدّث النظام والتطبيقات', 'أغلب الاختراقات تستغل ثغرات معروفة صدرت لها تحديثات.'],
+      ['ثبّت التطبيقات من المتاجر الرسمية', 'ملفات apk من مواقع أو روابط واتساب مصدر شائع للبرمجيات الخبيثة.'],
+      ['احذر الشبكات العامة', 'لا تُجرِ عمليات مالية على واي فاي مفتوح، واستخدم بيانات هاتفك بدلًا منه.'],
+      ['خذ نسخًا احتياطية', 'نسخة خارج الجهاز تنقذ ملفاتك من برمجيات الفدية وفقدان الجهاز.']
+    ]],
+    ['إذا شككت في اختراق حسابك', [
+      ['غيّر كلمة المرور من جهاز نظيف', 'ابدأ بالبريد الإلكتروني لأنه مفتاح استعادة بقية الحسابات.'],
+      ['أنهِ الجلسات النشطة', 'اخرج من كل الأجهزة وأزل التطبيقات المرتبطة التي لا تعرفها.'],
+      ['فعّل التحقق بخطوتين فورًا', 'حتى لو تسرّبت الكلمة، يبقى الدخول محميًا بخطوة ثانية.'],
+      ['راجع الأموال والرسائل المرسلة', 'إن ظهرت عمليات مالية، اتصل بالبنك فورًا وجمّد البطاقة.'],
+      ['افحص جهازك وأبلغ جهات الاتصال', 'نبّه معارفك إن أُرسلت رسائل باسمك.']
+    ]]
+  ];
+  $('#tipGroups').innerHTML = TIPS.map(function (g) {
+    return '<section><h2>' + g[0] + '</h2><ul>' + g[1].map(function (t) { return '<li><b>' + t[0] + '</b><span>' + t[1] + '</span></li>'; }).join('') + '</ul></section>';
+  }).join('');
+
+  var MSG = [
+    'تستعجلك أو تهدّد بإغلاق الحساب أو بإجراء قانوني',
+    'المرسل غير معروف أو عنوانه يشبه الأصلي مع اختلاف بسيط',
+    'تطلب كلمة مرور أو رمز تحقق أو بيانات بطاقة',
+    'الرابط لا يطابق الموقع الرسمي عند عرض وجهته',
+    'تتضمن مرفقًا لم تتوقعه',
+    'تعدك بجائزة أو ربح أو عرض مبالغ فيه',
+    'صياغتها غريبة أو فيها أخطاء لا تليق بجهة رسمية',
+    'تطلب دفعًا بعملة رقمية أو ببطاقات هدايا'
+  ];
+  $('#msgItems').innerHTML = MSG.map(function (t, i) {
+    return '<label for="m' + i + '"><input type="checkbox" id="m' + i + '"><span>' + t + '</span></label>';
+  }).join('');
+  function updMsg() {
+    var n = 0, otp = $('#m2').checked;
+    MSG.forEach(function (t, i) { if ($('#m' + i).checked) n++; });
+    var key = n === 0 ? '' : n <= 2 ? 'mid' : n <= 4 ? 'high' : 'crit';
+    if (otp && (key === '' || key === 'mid')) key = 'high';
+    var txt = !n ? 'لم تحدّد شيئًا بعد.' : key === 'mid' ? 'تدعو للحذر. تحقق من المرسل عبر قناة رسمية قبل أي تفاعل.' : key === 'high' ? 'غالبًا تصيّد. لا تضغط ولا تردّ، وتحقق من الجهة بنفسك.' : 'تصيّد شبه مؤكد. احذف الرسالة وأبلغ عنها.';
+    if (otp) txt += ' لا تشارك رمز التحقق مع أي أحد.';
+    var m = $('#msgMeter'); m.className = 'meter' + (key ? ' lv-' + key : '');
+    m.firstElementChild.style.width = Math.min(100, (n / MSG.length) * 100 + (otp && n < 4 ? 25 : 0)) + '%';
+    $('#msgVerdict').textContent = txt;
+  }
+  $('#msgItems').addEventListener('change', updMsg);
+
+  /* ---------- التنقل ---------- */
+  var VIEWS = ['links', 'password', 'site', 'report', 'tips'];
+  function show() {
+    var name = location.hash.slice(1);
+    if (VIEWS.indexOf(name) < 0) name = 'links';
+    document.querySelectorAll('[data-view]').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
+    document.querySelectorAll('[data-nav]').forEach(function (a) {
+      if (a.getAttribute('data-nav') === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    if (name === 'report') renderReport();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', show);
+
+  /* ---------- البداية: حالة عمل واقعية بأمثلة ---------- */
+  renderUrl(analyzeUrl(urlInput.value), true);
+  renderSite(analyzeUrl(siteInput.value), true);
+  renderPw();
+  generate();
+  show();
+})();
+</script>
+
+</body>
+</html>
