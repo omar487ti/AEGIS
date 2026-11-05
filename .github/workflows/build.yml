@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -19,12 +21,16 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Prepare Capacitor project
         run: |
           mkdir -p www
           cp index.html www/index.html
           npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets@3
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           cat > capacitor.config.json <<'EOF'
           {"appId":"com.aegis.app","appName":"AEGIS","webDir":"www"}
           EOF
@@ -32,13 +38,59 @@ jobs:
 
       - name: App icon
         run: |
-          if [ -f icon.png ]; then
-            mkdir -p assets
-            cp icon.png assets/icon.png
-            npx capacitor-assets generate --android --iconBackgroundColor '#2a4bd7' --iconBackgroundColorDark '#2a4bd7' || echo "Icon generation failed, using default icon"
-          else
-            echo "No icon.png found, using default icon"
-          fi
+          pip install pillow
+          cat > make_icons.py <<'PY'
+          import os, subprocess
+          from PIL import Image
+
+          exts = ('.png', '.jpg', '.jpeg', '.webp')
+          cands = [f for f in os.listdir('.') if f.lower().endswith(exts) and os.path.isfile(f)]
+          if not cands:
+              print('No icon image found at repo root, using default icon')
+              raise SystemExit(0)
+
+          def ts(f):
+              try:
+                  out = subprocess.check_output(['git', 'log', '-1', '--format=%ct', '--', f])
+                  return int(out.strip() or 0)
+              except Exception:
+                  return 0
+
+          cands.sort(key=lambda f: (ts(f), f == 'icon.png'), reverse=True)
+          src = cands[0]
+          print('Using icon image:', src)
+
+          im = Image.open(src).convert('RGBA')
+          w, h = im.size
+          s = min(w, h)
+          left, top = (w - s) // 2, (h - s) // 2
+          im = im.crop((left, top, left + s, top + s))
+          flat = Image.new('RGBA', im.size, (255, 255, 255, 255))
+          flat.alpha_composite(im)
+          im = flat.convert('RGB')
+          corner = im.getpixel((2, 2))
+          hexc = '#%02x%02x%02x' % corner
+
+          res = 'android/app/src/main/res'
+          sizes = {'mdpi': (48, 108), 'hdpi': (72, 162), 'xhdpi': (96, 216), 'xxhdpi': (144, 324), 'xxxhdpi': (192, 432)}
+          for d, (leg, fg) in sizes.items():
+              folder = res + '/mipmap-' + d
+              if not os.path.isdir(folder):
+                  continue
+              sq = im.resize((leg, leg), Image.LANCZOS)
+              sq.save(folder + '/ic_launcher.png')
+              sq.save(folder + '/ic_launcher_round.png')
+              inner = int(fg * 0.8)
+              layer = Image.new('RGBA', (fg, fg), (0, 0, 0, 0))
+              layer.paste(im.resize((inner, inner), Image.LANCZOS), ((fg - inner) // 2, (fg - inner) // 2))
+              layer.save(folder + '/ic_launcher_foreground.png')
+
+          os.makedirs(res + '/values', exist_ok=True)
+          xml = '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">' + hexc + '</color>\n</resources>\n'
+          open(res + '/values/ic_launcher_background.xml', 'w').write(xml)
+          print('Icon applied, background color', hexc)
+          PY
+          python make_icons.py
 
       - name: Build debug APK
         run: |
