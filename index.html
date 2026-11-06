@@ -4,7 +4,65 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
+
+:root[data-theme="light"]{
+  --bg:#edf4fa;--surface:#f8fbff;--ink:#102033;--ink-2:#52677d;--line:#c7d8e6;
+  --accent:#087da8;--accent-ink:#ffffff;--accent-soft:#d8f1fa;
+  --good:#11765a;--good-soft:#d9f1e8;--warn:#955000;--warn-soft:#fbead0;
+  --bad:#c22b38;--bad-soft:#fce1e4;--crit:#8c3f9f;--crit-soft:#f0def5;--grid:rgba(8,125,168,.07);color-scheme:light;
+}
+
+/* AEGIS v1.1 neon glass layer */
+body{background:radial-gradient(ellipse at 85% 0%,rgba(0,174,255,.12),transparent 36%),radial-gradient(ellipse at 5% 55%,rgba(130,65,255,.08),transparent 32%),var(--bg);padding-top:max(14px,env(safe-area-inset-top,0px))}
+.top,.tile,.facts,.metrics,.ext a,.empty,.tip-groups section,.tool-card,.hero-card,.network-panel,.setting-row{
+  background:linear-gradient(145deg,rgba(14,29,48,.94),rgba(7,14,27,.92));
+  border:1px solid rgba(41,177,235,.23);border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 28px rgba(0,0,0,.18)
+}
+.top{border-color:rgba(22,200,255,.3);box-shadow:0 0 26px rgba(0,174,255,.07)}
+.brand-name{letter-spacing:.18em;color:#e8faff;text-shadow:0 0 18px rgba(22,200,255,.38)}
+.brand-sub{color:#91b8d0}
+.local{background:rgba(53,230,173,.1);color:#55e9b9;border:1px solid rgba(53,230,173,.25);border-radius:30px}
+.btn{border-radius:12px;border-color:rgba(37,183,240,.32);background:rgba(13,31,50,.85);color:var(--ink);transition:transform .18s,border-color .18s,box-shadow .18s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(110deg,#0db8ed,#5867f5);border-color:#2ccfff;color:#03101a;box-shadow:0 0 18px rgba(22,200,255,.22)}
+input[type=text],input[type=password]{border-radius:12px;border-color:rgba(37,183,240,.3);background:#070f1c;min-height:49px}
+.nav{background:rgba(5,10,20,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(22,200,255,.25);box-shadow:0 -8px 28px rgba(0,0,0,.28)}
+.nav a{border-radius:12px}.nav .ic{border-radius:11px}
+.nav a[aria-current="page"]{color:#20d3ff;text-shadow:0 0 12px rgba(22,200,255,.45)}
+.nav a[aria-current="page"] .ic{background:rgba(22,200,255,.12);box-shadow:0 0 16px rgba(22,200,255,.15)}
+h1,h2,h3{color:#edfaff}
+.lede,.note{color:#91a8bd}
+.chip{background:rgba(22,200,255,.12);color:#4bdcff;border-radius:20px}
+.pill{border-radius:20px}
+.g-track{stroke:#1b3650}
+.g-fill{filter:drop-shadow(0 0 5px var(--lv))}
+.tile{padding:16px}.tile b{color:#39d7ff}
+.tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.tool-card{padding:15px;min-width:0;text-align:right;color:var(--ink);cursor:pointer;display:grid;gap:8px;min-height:112px}
+.tool-card strong{font-size:14px}.tool-card small{color:var(--ink-2);font-size:12px;line-height:1.5}
+.tool-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(22,200,255,.11);border:1px solid rgba(22,200,255,.25);color:#37d7ff;font-size:20px}
+.hero-card{padding:18px;display:grid;gap:14px;background:linear-gradient(135deg,rgba(8,43,67,.95),rgba(22,18,54,.94));}
+.hero-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hero-brand{font:700 28px var(--font-display);direction:ltr;letter-spacing:.18em}
+.hero-tag{color:#75dfff;font:12px var(--font-mono);direction:ltr}
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat-box{padding:13px;border:1px solid rgba(22,200,255,.2);border-radius:13px;background:rgba(4,13,26,.56);min-width:0}
+.stat-box b{display:block;font:600 19px var(--font-mono);direction:ltr;overflow-wrap:anywhere}
+.stat-box span{font-size:12px;color:var(--ink-2)}
+.network-panel{padding:16px;display:grid;gap:12px}
+.network-panel h2{font-size:18px}
+.output{padding:13px;border-radius:12px;background:rgba(2,9,18,.72);border:1px solid rgba(22,200,255,.18);overflow-wrap:anywhere;white-space:pre-wrap;font-size:13px}
+.setting-row{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.section-kicker{font:500 11px var(--font-mono);color:#50d8ff;letter-spacing:.13em;direction:ltr}
+.tool-actions{display:flex;gap:8px;flex-wrap:wrap}
+[data-view]{animation:viewIn .22s ease}
+@keyframes viewIn{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(max-width:390px){.tool-grid{gap:8px}.tool-card{padding:12px}.hero-brand{font-size:24px}}
+@media(min-width:760px){.tool-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+</style>
 <title>AEGIS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,30 +71,30 @@
 <style>
 /* Layout: right-hand rail on desktop, bottom tab bar on phones; each tool is an open working surface (input, gauge, findings), not a stack of cards. */
 :root{
-  --bg:#edf0f5; --surface:#f8f9fc; --ink:#111a2e; --ink-2:#4b566b; --line:#d2d9e5;
-  --accent:#2a4bd7; --accent-ink:#ffffff; --accent-soft:#e0e6fb;
-  --good:#11765a; --good-soft:#d9f1e8; --warn:#955000; --warn-soft:#fbead0;
-  --bad:#c22b38; --bad-soft:#fce1e4; --crit:#8c1138; --crit-soft:#f8dae5;
-  --grid:rgba(42,75,215,.07);
+  --bg:#050811; --surface:#0b1220; --ink:#eaf7ff; --ink-2:#91a8bd; --line:#1b3650;
+  --accent:#16c8ff; --accent-ink:#03101a; --accent-soft:#10334a;
+  --good:#35e6ad; --good-soft:#10382f; --warn:#ffc45c; --warn-soft:#403016;
+  --bad:#ff7189; --bad-soft:#421b2a; --crit:#c58aff; --crit-soft:#302044;
+  --grid:rgba(22,200,255,.07);
   --font-display:'Reem Kufi','IBM Plex Sans Arabic',system-ui,sans-serif;
   --font-body:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0c1019; --surface:#131a27; --ink:#e8ecf5; --ink-2:#9ba6bd; --line:#26314a;
-    --accent:#8aa0ff; --accent-ink:#0c1019; --accent-soft:#1c2650;
-    --good:#45d1a0; --good-soft:#123a2f; --warn:#f2a850; --warn-soft:#3b2a10;
-    --bad:#ff7b86; --bad-soft:#43181e; --crit:#ff80a6; --crit-soft:#44152a;
-    --grid:rgba(138,160,255,.08); color-scheme:dark;
+    --bg:#050811; --surface:#0b1220; --ink:#eaf7ff; --ink-2:#91a8bd; --line:#1b3650;
+    --accent:#16c8ff; --accent-ink:#03101a; --accent-soft:#10334a;
+    --good:#35e6ad; --good-soft:#10382f; --warn:#ffc45c; --warn-soft:#403016;
+    --bad:#ff7189; --bad-soft:#421b2a; --crit:#c58aff; --crit-soft:#302044;
+    --grid:rgba(22,200,255,.07); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0c1019; --surface:#131a27; --ink:#e8ecf5; --ink-2:#9ba6bd; --line:#26314a;
-  --accent:#8aa0ff; --accent-ink:#0c1019; --accent-soft:#1c2650;
-  --good:#45d1a0; --good-soft:#123a2f; --warn:#f2a850; --warn-soft:#3b2a10;
-  --bad:#ff7b86; --bad-soft:#43181e; --crit:#ff80a6; --crit-soft:#44152a;
-  --grid:rgba(138,160,255,.08); color-scheme:dark;
+  --bg:#050811; --surface:#0b1220; --ink:#eaf7ff; --ink-2:#91a8bd; --line:#1b3650;
+  --accent:#16c8ff; --accent-ink:#03101a; --accent-soft:#10334a;
+  --good:#35e6ad; --good-soft:#10382f; --warn:#ffc45c; --warn-soft:#403016;
+  --bad:#ff7189; --bad-soft:#421b2a; --crit:#c58aff; --crit-soft:#302044;
+  --grid:rgba(22,200,255,.07); color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{
@@ -215,14 +273,69 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
   </header>
 
   <nav class="nav" aria-label="أقسام التطبيق" id="nav">
-    <a href="#links" data-nav="links"><span class="ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></span>الروابط</a>
-    <a href="#password" data-nav="password"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg></span>كلمات المرور</a>
-    <a href="#site" data-nav="site"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.200 3 14.800 0 18M12 3c-3 3.200-3 14.800 0 18"/></svg></span>المواقع</a>
-    <a href="#report" data-nav="report"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>التقرير</a>
-    <a href="#tips" data-nav="tips"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.500 8 8 9 4.500-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>النصائح</a>
-  </nav>
+     <a href="#home" data-nav="home"><span class="ic">⌂</span>الرئيسية</a>
+     <a href="#tools" data-nav="tools"><span class="ic">⌘</span>الأدوات</a>
+     <a href="#report" data-nav="report"><span class="ic">▥</span>الإحصائيات</a>
+     <a href="#settings" data-nav="settings"><span class="ic">⚙</span>الإعدادات</a>
+   </nav>
 
   <main>
+
+    <section data-view="home">
+      <div class="hero-card">
+        <div class="hero-line"><div><div class="hero-brand">AEGIS</div><div class="hero-tag">PROTECT • ANALYZE • SECURE</div></div><span class="chip">v1.1</span></div>
+        <div><div class="section-kicker">PROTECTION STATUS</div><h2>مركز الحماية والتحليل</h2><p class="lede">أدوات فحص وتحليل أمني ضمن واجهة واحدة.</p></div>
+        <div class="hero-line"><span class="pill lv-low">جاهز للفحص</span><button class="btn primary" type="button" data-go="tools">ابدأ الفحص الشامل</button></div>
+      </div>
+      <div class="head"><h2>نظرة عامة</h2><p class="lede">معلومات اتصال حقيقية عند توفر الاتصال بالإنترنت.</p></div>
+      <div class="stat-grid">
+        <div class="stat-box"><b id="homeIP">—</b><span>عنوان IP العام</span></div>
+        <div class="stat-box"><b id="homeSpeed">—</b><span>سرعة التنزيل التقديرية</span></div>
+        <div class="stat-box"><b id="homeCount">0</b><span>عدد الفحوصات المحفوظة</span></div>
+        <div class="stat-box"><b id="homeLast">—</b><span>آخر عملية فحص</span></div>
+      </div>
+      <div class="tool-actions"><button class="btn" id="homeRefresh" type="button">تحديث معلومات الشبكة</button><button class="btn primary" type="button" data-go="links">فحص رابط</button></div>
+      <p class="note" id="homeStatus">لم يتم جلب معلومات الشبكة بعد.</p>
+    </section>
+
+    <section data-view="tools" hidden>
+      <div class="head"><div class="section-kicker">SECURITY TOOLKIT</div><h1>الأدوات</h1><p class="lede">اختر الأداة المطلوبة. النتائج التي تحتاج خادماً خارجياً ستُوضّح مصدرها.</p></div>
+      <h2>فحص وتحليل</h2>
+      <div class="tool-grid">
+        <button class="tool-card" data-go="links"><span class="tool-icon">⛨</span><strong>فحص الروابط</strong><small>تحليل بنية الرابط ومؤشرات التصيّد وDNS.</small></button>
+        <button class="tool-card" data-go="password"><span class="tool-icon">⌁</span><strong>قوة كلمة المرور</strong><small>تقييم محلي وإنشاء كلمات عشوائية.</small></button>
+        <button class="tool-card" data-go="site"><span class="tool-icon">◎</span><strong>تحليل المواقع</strong><small>تفاصيل النطاق والشهادة والسمعة.</small></button>
+        <button class="tool-card" data-go="network"><span class="tool-icon">⌘</span><strong>NETWORK SECURITY</strong><small>أدوات معلومات الشبكة وDNS وSSL.</small></button>
+        <button class="tool-card" data-go="tips"><span class="tool-icon">盾</span><strong>نصائح الحماية</strong><small>إرشادات ضد التصيّد وحماية الحسابات.</small></button>
+        <button class="tool-card" data-go="report"><span class="tool-icon">▥</span><strong>التقارير</strong><small>سجل الفحوصات وتقييم المخاطر.</small></button>
+      </div>
+    </section>
+
+    <section data-view="network" hidden>
+      <div class="head"><div class="section-kicker">NETWORK SECURITY</div><h1>أمن الشبكات</h1><p class="lede">أدوات معلومات الاتصال والنطاقات والشهادات. بعض بيانات Wi-Fi والمنافذ محجوبة عن صفحات الويب بسبب قيود أمان Android والمتصفح.</p></div>
+      <div class="tool-grid">
+        <button class="tool-card" data-net="scanner"><span class="tool-icon">⌘</span><strong>Network Scanner</strong><small>معلومات الاتصال وIP ونوع الشبكة.</small></button>
+        <button class="tool-card" data-net="ip"><span class="tool-icon">◎</span><strong>IP Lookup</strong><small>IP العام والدولة ومزود الإنترنت.</small></button>
+        <button class="tool-card" data-net="dns"><span class="tool-icon">↔</span><strong>DNS Checker</strong><small>استعلام DNS وعرض السجلات.</small></button>
+        <button class="tool-card" data-net="ssl"><span class="tool-icon">♧</span><strong>SSL Checker</strong><small>فتح فحص الشهادة وتاريخها عبر SSL Labs.</small></button>
+        <button class="tool-card" data-net="ports"><span class="tool-icon">▤</span><strong>Port Inspector</strong><small>معلومات المنافذ الشائعة دون إجراء مسح غير مصرح.</small></button>
+        <button class="tool-card" data-net="wifi"><span class="tool-icon">◉</span><strong>Wi-Fi Analyzer</strong><small>نوع الاتصال وسرعته التقديرية؛ RSSI وSSID يتطلبان صلاحية أصلية.</small></button>
+      </div>
+      <div class="network-panel" id="networkResult"><h2>نتائج أدوات الشبكة</h2><p class="note">اختر أداة من الأعلى لبدء الفحص.</p></div>
+      <div class="network-panel">
+        <h2>قياس سرعة الإنترنت</h2><p class="note">يقيس تنزيل عينة صغيرة من خادم Cloudflare. النتيجة تقديرية وتتأثر بالشبكة والخادم.</p>
+        <button class="btn primary" id="speedTest" type="button">ابدأ قياس السرعة</button>
+        <div class="output" id="speedResult">لم يبدأ الاختبار.</div>
+      </div>
+    </section>
+
+    <section data-view="settings" hidden>
+      <div class="head"><div class="section-kicker">PREFERENCES</div><h1>الإعدادات</h1><p class="lede">إعدادات العرض ومعلومات إصدار AEGIS.</p></div>
+      <div class="setting-row"><div><strong>المظهر الداكن</strong><p class="note">واجهة سوداء مع ألوان نيون.</p></div><input id="themeToggle" type="checkbox" checked aria-label="المظهر الداكن"></div>
+      <div class="setting-row"><div><strong>الخصوصية</strong><p class="note">كلمات المرور لا تُرسل أو تُحفظ. سجل الفحص محلي على الجهاز.</p></div><span class="chip">محلي</span></div>
+      <div class="setting-row"><div><strong>إصدار التطبيق</strong><p class="note">AEGIS Security Toolkit</p></div><span class="mono">1.1</span></div>
+      <div class="network-panel"><h2>حدود الوصول</h2><p class="note">نسخة HTML داخل WebView لا تستطيع قراءة SSID أو قوة إشارة Wi-Fi، ولا تستطيع إجراء فحص منافذ TCP على الشبكة المحلية. تتطلب هذه الميزات إضافة Android أصلية وصلاحيات مناسبة.</p></div>
+    </section>
     <!-- الروابط -->
     <section data-view="links">
       <div class="head">
@@ -232,7 +345,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
       <form id="urlForm" autocomplete="off">
         <label class="lbl" for="urlInput">الرابط</label>
         <div class="row">
-          <input id="urlInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" value="http://paypal-secure-login.account-verify.xyz/signin?user=1&amp;redirect=http://pay-check.example">
+          <input id="urlInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false">
           <button class="btn primary" type="submit">افحص الرابط</button>
         </div>
       </form>
@@ -248,7 +361,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
       <div>
         <label class="lbl" for="pwInput">كلمة المرور</label>
         <div class="row">
-          <input id="pwInput" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="Pa$$w0rd2024">
+          <input id="pwInput" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
           <button class="btn" type="button" id="pwToggle">إظهار</button>
         </div>
         <p class="note" id="pwNote">النتيجة أدناه لكلمة تجريبية. اكتب كلمتك لتُحلَّل.</p>
@@ -285,7 +398,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
       <form id="siteForm" autocomplete="off">
         <label class="lbl" for="siteInput">اسم الموقع أو رابطه</label>
         <div class="row">
-          <input id="siteInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" value="https://accounts.google.com/signin">
+          <input id="siteInput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false">
           <button class="btn primary" type="submit">حلّل الموقع</button>
         </div>
       </form>
@@ -611,7 +724,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
     e.preventDefault();
     var r = analyzeUrl(urlInput.value);
     renderUrl(r, false);
-    if (r.ok) addHist('url', r);
+    if (r.ok) { addHist('url', r); deepDnsCheck(r.host, 'urlResult'); }
   });
   urlInput.addEventListener('focus', function () { urlInput.select(); });
 
@@ -669,7 +782,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
     e.preventDefault();
     var r = analyzeUrl(siteInput.value);
     renderSite(r, false);
-    if (r.ok && !r.special) addHist('site', r);
+    if (r.ok && !r.special) { addHist('site', r); deepDnsCheck(r.host, 'siteResult'); }
   });
   siteInput.addEventListener('focus', function () { siteInput.select(); });
 
@@ -967,26 +1080,188 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
   }
   $('#msgItems').addEventListener('change', updMsg);
 
-  /* ---------- التنقل ---------- */
-  var VIEWS = ['links', 'password', 'site', 'report', 'tips'];
+  /* ---------- التنقل الرئيسي ---------- */
+  var VIEWS = ['home','tools','network','settings','links','password','site','report','tips'];
+  function mainTab(name) {
+    if (name === 'report') return 'report';
+    if (name === 'settings') return 'settings';
+    if (name === 'home') return 'home';
+    return 'tools';
+  }
   function show() {
     var name = location.hash.slice(1);
-    if (VIEWS.indexOf(name) < 0) name = 'links';
+    if (VIEWS.indexOf(name) < 0) name = 'home';
     document.querySelectorAll('[data-view]').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
+    var active = mainTab(name);
     document.querySelectorAll('[data-nav]').forEach(function (a) {
-      if (a.getAttribute('data-nav') === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      if (a.getAttribute('data-nav') === active) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     if (name === 'report') renderReport();
+    if (name === 'home') updateHomeStats();
     window.scrollTo(0, 0);
   }
+  document.addEventListener('click', function(e){
+    var go = e.target.closest('[data-go]');
+    if (go) location.hash = '#' + go.getAttribute('data-go');
+  });
   window.addEventListener('hashchange', show);
 
+
+  /* ---------- AEGIS v1.1: Network Security + network status ---------- */
+  function setNetworkResult(title, body) {
+    var box = $('#networkResult');
+    if (!box) return;
+    box.innerHTML = '<h2>' + esc(title) + '</h2><div class="output">' + body + '</div>';
+  }
+  function netType() {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return 'غير متاح من WebView';
+    return 'النوع: ' + (c.type || 'غير معروف') + ' · الفئة: ' + (c.effectiveType || 'غير معروفة') +
+      (c.downlink ? ' · تقدير المتصفح: ' + c.downlink + ' Mbps' : '');
+  }
+  async function getIPInfo() {
+    var r = await fetch('https://ipwho.is/', {cache:'no-store'});
+    if (!r.ok) throw new Error('تعذر الاتصال بخدمة IP Lookup');
+    var d = await r.json();
+    if (d.success === false) throw new Error(d.message || 'فشل الاستعلام');
+    return d;
+  }
+  async function updateHomeStats() {
+    $('#homeCount').textContent = String(hist.length);
+    $('#homeLast').textContent = hist.length ? new Date(hist[0].t).toLocaleString('ar-IQ',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}) : 'لا يوجد';
+  }
+  async function refreshNetworkHome() {
+    $('#homeStatus').textContent = 'جارٍ جلب معلومات الاتصال…';
+    try {
+      var d = await getIPInfo();
+      $('#homeIP').textContent = d.ip || 'غير متاح';
+      $('#homeStatus').textContent = 'الدولة: ' + (d.country || 'غير متاحة') + ' · المزود: ' + ((d.connection && d.connection.isp) || 'غير متاح') + ' · ' + netType();
+    } catch(e) {
+      $('#homeStatus').textContent = 'تعذر جلب IP العام: ' + e.message + '. تحقق من اتصال الإنترنت.';
+    }
+  }
+  $('#homeRefresh').addEventListener('click', refreshNetworkHome);
+
+  async function dnsQuery(host, type) {
+    var endpoint = 'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(host) + '&type=' + encodeURIComponent(type);
+    var r = await fetch(endpoint, {headers:{accept:'application/dns-json'},cache:'no-store'});
+    if (!r.ok) throw new Error('DNS request failed');
+    return r.json();
+  }
+  async function deepDnsCheck(host, targetId) {
+    if (!host || host.indexOf(':') >= 0) return;
+    var box = document.getElementById(targetId);
+    if (!box) return;
+    var old = box.querySelector('.deep-dns');
+    if (old) old.remove();
+    var node = document.createElement('div');
+    node.className = 'network-panel deep-dns';
+    node.innerHTML = '<h3>تحقق DNS إضافي</h3><p class="note">جارٍ الاستعلام من Cloudflare DNS…</p>';
+    box.appendChild(node);
+    try {
+      var data = await dnsQuery(host,'A');
+      var answers = (data.Answer || []).filter(function(x){return x.type===1;}).map(function(x){return x.data;});
+      node.innerHTML = '<h3>تحقق DNS إضافي</h3><p>' +
+        (answers.length ? 'عناوين A التي أعادها DNS:' : 'لم يُرجع الاستعلام سجلات A.') +
+        '</p><div class="output">' + esc(answers.join('\\n') || 'لا توجد إجابة A') +
+        '</div><p class="note">المصدر: Cloudflare DNS over HTTPS. هذا لا يثبت أن الموقع آمن.</p>';
+    } catch(e) {
+      node.innerHTML = '<h3>تحقق DNS إضافي</h3><p class="note">تعذر تنفيذ استعلام DNS من هذا المتصفح.</p>';
+    }
+  }
+
+  document.addEventListener('click', async function(e){
+    var b = e.target.closest('[data-net]');
+    if (!b) return;
+    var tool = b.getAttribute('data-net');
+    setNetworkResult('جارٍ تنفيذ الأداة…','يرجى الانتظار.');
+    try {
+      if (tool === 'ip') {
+        var ip = await getIPInfo();
+        setNetworkResult('IP Lookup',
+          'IP العام: ' + esc(ip.ip || 'غير متاح') + '\\nالدولة: ' + esc(ip.country || 'غير متاحة') +
+          '\\nالمنطقة: ' + esc(ip.region || 'غير متاحة') + '\\nالمدينة: ' + esc(ip.city || 'غير متاحة') +
+          '\\nمزود الإنترنت: ' + esc((ip.connection && ip.connection.isp) || 'غير متاح') +
+          '\\nASN: ' + esc((ip.connection && ip.connection.asn) || 'غير متاح') +
+          '\\nالمصدر: ipwho.is');
+      } else if (tool === 'dns') {
+        var host = prompt('اكتب اسم النطاق (مثال: example.com):');
+        if (!host) return;
+        host = host.trim().replace(/^https?:\/\//i,'').split('/')[0];
+        if (!/^[a-z0-9.-]+$/i.test(host)) throw new Error('اسم نطاق غير صالح');
+        var types = ['A','AAAA','MX','TXT','NS'];
+        var results = await Promise.all(types.map(async function(t){
+          try { var x = await dnsQuery(host,t); return t + ': ' + ((x.Answer||[]).map(function(a){return a.data;}).join(', ') || 'لا توجد سجلات'); }
+          catch(err){ return t + ': تعذر الاستعلام'; }
+        }));
+        setNetworkResult('DNS Checker · ' + host, esc(results.join('\\n')) + '\\n\\nالمصدر: Cloudflare DNS over HTTPS');
+      } else if (tool === 'ssl') {
+        var sslHost = prompt('اكتب اسم النطاق لفحص شهادة SSL:');
+        if (!sslHost) return;
+        sslHost = sslHost.trim().replace(/^https?:\/\//i,'').split('/')[0];
+        if (!/^[a-z0-9.-]+$/i.test(sslHost)) throw new Error('اسم نطاق غير صالح');
+        window.open('https://www.ssllabs.com/ssltest/analyze.html?d=' + encodeURIComponent(sslHost) + '&latest','_blank','noopener');
+        setNetworkResult('SSL Checker','تم فتح SSL Labs في صفحة مستقلة لإجراء فحص الشهادة والخادم. لم تُعرض نتيجة محلية لأن الفحص يحتاج خدمة خارجية.');
+      } else if (tool === 'scanner') {
+        var info = await getIPInfo();
+        setNetworkResult('Network Scanner · معلومات الاتصال',
+          'IP العام: ' + esc(info.ip || 'غير متاح') + '\\nالدولة: ' + esc(info.country || 'غير متاحة') +
+          '\\nمزود الإنترنت: ' + esc((info.connection && info.connection.isp) || 'غير متاح') +
+          '\\nنوع الاتصال حسب المتصفح: ' + esc(netType()) +
+          '\\n\\nتنبيه: هذه الأداة تعرض معلومات اتصال جهازك ولا تمسح الأجهزة الأخرى على الشبكة.');
+      } else if (tool === 'wifi') {
+        var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        setNetworkResult('Wi-Fi Analyzer',
+          'نوع الاتصال: ' + esc((c && c.type) || 'المتصفح لا يكشف نوع Wi-Fi بشكل موثوق') +
+          '\\nفئة الشبكة: ' + esc((c && c.effectiveType) || 'غير متاحة') +
+          '\\nسرعة تقديرية من المتصفح: ' + esc((c && c.downlink ? c.downlink + ' Mbps' : 'غير متاحة')) +
+          '\\nقوة الإشارة RSSI: غير متاحة عبر HTML/WebView' +
+          '\\nاسم الشبكة SSID: غير متاح دون صلاحيات Android أصلية.');
+      } else if (tool === 'ports') {
+        var target = prompt('اكتب اسم جهازك أو نطاقاً تملك تصريحاً بفحصه (للمعلومات فقط):');
+        if (!target) return;
+        setNetworkResult('Port Inspector · ' + esc(target),
+          'هذه النسخة لا تنفذ اتصالات TCP ولا تفحص المنافذ فعلياً بسبب قيود المتصفح.\\n\\nمعلومات منافذ شائعة:\\n22 SSH · 53 DNS · 80 HTTP · 443 HTTPS · 8080 HTTP بديل · 8443 HTTPS بديل.\\n\\nلا تعتبر هذه القائمة دليلاً على أن أي منفذ مفتوح على الهدف. يلزم مكوّن فحص أصلي وخادم وسيط مصرح به لإجراء فحص حقيقي.');
+      }
+    } catch(err) {
+      setNetworkResult('تعذر إكمال الفحص', esc(err.message || 'حدث خطأ غير متوقع'));
+    }
+  });
+
+  $('#speedTest').addEventListener('click', async function(){
+    var out = $('#speedResult'), btn = $('#speedTest');
+    btn.disabled = true; btn.textContent = 'جارٍ القياس…'; out.textContent = 'يتم تنزيل عينة اختبار صغيرة من Cloudflare…';
+    try {
+      var bytes = 5000000, start = performance.now();
+      var response = await fetch('https://speed.cloudflare.com/__down?bytes=' + bytes + '&_=' + Date.now(), {cache:'no-store'});
+      if (!response.ok) throw new Error('خادم القياس غير متاح');
+      var blob = await response.blob();
+      var seconds = (performance.now()-start)/1000;
+      var mbps = (blob.size*8/seconds/1000000);
+      out.textContent = 'سرعة التنزيل التقديرية: ' + mbps.toFixed(2) + ' Mbps\\nحجم العينة: ' + (blob.size/1000000).toFixed(2) + ' MB\\nالزمن: ' + seconds.toFixed(2) + ' ثانية\\nالمصدر: Cloudflare Speed Test';
+      $('#homeSpeed').textContent = mbps.toFixed(1) + ' Mbps';
+    } catch(err) {
+      out.textContent = 'تعذر قياس السرعة: ' + err.message;
+    } finally { btn.disabled = false; btn.textContent = 'إعادة قياس السرعة'; }
+  });
+
+  var themeToggle = $('#themeToggle');
+  try { themeToggle.checked = localStorage.getItem('aegis_theme') !== 'light'; } catch(e) {}
+  function applyTheme() {
+    var dark = themeToggle.checked;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    try { localStorage.setItem('aegis_theme', dark ? 'dark' : 'light'); } catch(e) {}
+  }
+  themeToggle.addEventListener('change', applyTheme);
+  applyTheme();
+
   /* ---------- البداية: حالة عمل واقعية بأمثلة ---------- */
-  renderUrl(analyzeUrl(urlInput.value), true);
-  renderSite(analyzeUrl(siteInput.value), true);
-  renderPw();
+  $('#urlResult').innerHTML = '<div class="empty">أدخل رابطاً لبدء الفحص. لا يتم عرض نتائج تجريبية على أنها حقيقية.</div>';
+  $('#siteResult').innerHTML = '<div class="empty">أدخل نطاقاً أو رابطاً لعرض معلوماته.</div>';
+  $('#pwResult').innerHTML = '<div class="empty">أدخل كلمة مرور لبدء التحليل المحلي.</div>';
   generate();
   show();
+  refreshNetworkHome();
 })();
 </script>
 
